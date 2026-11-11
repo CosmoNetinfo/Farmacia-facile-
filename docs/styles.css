@@ -173,7 +173,8 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
 .sources-dialog p + p { margin-top: 6px; }
 .sources-dialog a { color: var(--green-dark); font-weight: 800; }
 .sources-dialog .report-pharmacy { margin-bottom: 12px; color: var(--ink); font-weight: 700; }
-.report-contact-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.report-contact-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 12px; margin-top: 12px; }
+.report-contact-links .secondary { min-height: 48px; text-align: center; }
 
 @media (min-width: 861px) {
   .directory.map-view .result-grid { grid-template-columns: minmax(0, 1fr); }
@@ -190,6 +191,7 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
   .area-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
+  .report-contact-links { grid-template-columns: 1fr; }
   .wrap { width: calc(100% - 32px); }
   .topbar-inner { min-height: 61px; }
   .topbar nav { gap: 12px; font-size: 11px; }
