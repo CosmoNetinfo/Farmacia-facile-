@@ -19,6 +19,7 @@ Sviluppata da [CosmoNet.info](https://www.cosmonet.info/).
 - **Link condivisibili**: l'indirizzo della pagina contiene comune, provincia ed eventuale frazione, ad esempio `?comune=Spoleto&provincia=PG`.
 - **Nessun backend e nessun account**: è un sito statico, la ricerca avviene nel browser.
 - **Pannello "Fonti dei dati"** con tutte le fonti, le licenze e le date di estrazione.
+- **Segnala o correggi** da ogni scheda. Puoi aprire l’editor OpenStreetMap quando è disponibile un punto e aprire un modulo GitHub con i dati pubblici della farmacia già compilati.
 - Ha manifest e icone per essere aggiunta alla schermata Home. Una modalità offline non c'è ancora.
 
 ## Dati al momento (misurati l'11 novembre 2026)
@@ -112,11 +113,13 @@ Il codice non richiede account e non salva dati personali. Il browser però cont
 
 La posizione si chiede solo quando premi «Usa la mia posizione». L’app calcola le distanze sul dispositivo e tiene le coordinate in memoria per la ricerca corrente, senza inviarle a servizi esterni, inserirle nell’URL o salvarle nel browser. In questa vista la mappa mostra i segnaposti su una griglia locale, senza richieste ai server della cartografia.
 
+«Segnala o correggi» apre i servizi esterni solo quando selezioni uno dei due link. GitHub richiede un account e le segnalazioni inviate sono pubbliche. Il modulo riceve ID ministeriale, nome, comune e provincia della farmacia.
+
 ## Contribuire
 
 Il progetto è in una fase molto iniziale e ogni aiuto è benvenuto: segnalazioni di dati sbagliati, idee, test su dispositivi diversi. Apri una issue indicando comune, provincia e cosa ti aspettavi di vedere.
 
-Un modo molto utile per migliorare i dati è completare le farmacie su [OpenStreetMap](https://www.openstreetmap.org/): telefono, sito e orari (`opening_hours`) arriveranno anche qui.
+Puoi correggere telefono, sito e orari (`opening_hours`) su OpenStreetMap dal dialogo «Segnala o correggi». Le modifiche arrivano al prossimo aggiornamento dell’estrazione OpenStreetMap. Per le farmacie prive di coordinate e di un oggetto OpenStreetMap abbinato, il dialogo offre la segnalazione su GitHub.
 
 ## Licenza e attribuzioni
 

@@ -144,6 +144,13 @@ function buildCities() {
 const cities = buildCities();
 const byId = id => document.getElementById(id);
 const sourcesDialog = byId("fonti");
+const reportDialog = byId("report");
+let reportTrigger;
+reportDialog.addEventListener("close", () => {
+  const trigger = reportTrigger?.isConnected ? reportTrigger
+    : list.querySelector('[data-report="' + reportTrigger?.dataset.report + '"]');
+  (trigger || directory).focus({ preventScroll: true });
+});
 document.querySelectorAll("[data-sources]").forEach(button => {
   button.addEventListener("click", () => sourcesDialog.showModal());
 });
@@ -222,6 +229,41 @@ function opensAllDay(pharmacy) {
   const daily = dailyHours(pharmacy);
   return pharmacy.info?.alwaysOpen && (!daily || daily.hours === "00:00–24:00");
 }
+function osmEditor(pharmacy) {
+  const url = new URL("https://www.openstreetmap.org/edit");
+  // The matched OSM object can also exist for a manually curated card.
+  const [type, id] = osmContacts[pharmacy.id] || [];
+  if (["node", "way", "relation"].includes(type) && /^[1-9]\d*$/.test(id)) {
+    url.searchParams.set("editor", "id");
+    url.searchParams.set(type, id);
+  } else if (pharmacy.coords?.length === 2 && pharmacy.coords.every(Number.isFinite)) {
+    url.hash = "map=19/" + pharmacy.coords.join("/");
+  } else {
+    return undefined;
+  }
+  return url;
+}
+function openReport(pharmacy, trigger) {
+  const place = pharmacy.town.label + " (" + pharmacy.town.province + ")";
+  const issue = new URL("https://github.com/CosmoNetinfo/Farmacia-facile-/issues/new");
+  issue.search = new URLSearchParams({
+    template: "segnalazione.yml",
+    title: "Segnalazione: " + pharmacy.name + ", " + place,
+    "id-ministeriale": pharmacy.id,
+    farmacia: pharmacy.name,
+    "comune-provincia": place
+  });
+  const editor = osmEditor(pharmacy);
+  byId("report-pharmacy").textContent = pharmacy.name + " · " + place;
+  byId("report-osm-section").hidden = !editor;
+  byId("report-no-osm").hidden = Boolean(editor);
+  const osmLink = byId("report-osm");
+  if (editor) osmLink.href = editor;
+  else osmLink.removeAttribute("href");
+  byId("report-github").href = issue;
+  reportTrigger = trigger;
+  reportDialog.showModal();
+}
 function card(pharmacy) {
   const row = element("li", "pharmacy-card");
   row.dataset.id = pharmacy.id;
@@ -258,6 +300,12 @@ function card(pharmacy) {
   }
   if (pharmacy.info?.site) actions.append(withIcon(external("", pharmacy.info.site, "card-action"), "globe", "Sito web"));
   actions.append(withIcon(external("", directions(pharmacy), "card-action"), "directions", "Indicazioni"));
+  const report = element("button", "card-action", "Segnala o correggi");
+  report.type = "button";
+  report.dataset.report = pharmacy.id;
+  report.setAttribute("aria-haspopup", "dialog");
+  report.setAttribute("aria-controls", "report");
+  actions.append(report);
   if (pharmacy.info?.source) actions.append(external("Fonte OSM", pharmacy.info.source, "card-source"));
   if (daily) actions.append(external(daily.label, daily.source, "card-source"));
   row.append(actions);
@@ -784,6 +832,12 @@ byId("list-view").addEventListener("click", () => setView("list"));
 byId("map-view").addEventListener("click", () => setView("map"));
 byId("map-fit").addEventListener("click", fitMarkers);
 list.addEventListener("click", event => {
+  const report = event.target.closest("[data-report]");
+  if (report) {
+    const pharmacy = pharmacies.find(item => item.id === Number(report.dataset.report));
+    if (pharmacy) openReport(pharmacy, report);
+    return;
+  }
   const locate = event.target.closest("[data-locate]");
   if (!locate || !map) return;
   selection = Number(locate.dataset.locate);

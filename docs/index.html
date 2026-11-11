@@ -173,6 +173,25 @@
       <p>Per orari e recapiti diamo priorità ai siti delle farmacie. Dove disponibili, integriamo i dati di <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, <a href="recapiti-osm.js" download>scarica i dati</a>). <span id="osm-date" hidden></span>Chiama per confermare gli orari, soprattutto nei festivi.</p>
     </section>
   </dialog>
+  <dialog id="report" class="sources-dialog" aria-labelledby="report-title" aria-describedby="report-pharmacy">
+    <div class="sources-heading">
+      <h2 id="report-title">Segnala o correggi</h2>
+      <form method="dialog">
+        <button class="sources-close" autofocus>Chiudi</button>
+      </form>
+    </div>
+    <p id="report-pharmacy" class="report-pharmacy"></p>
+    <section id="report-osm-section" aria-label="OpenStreetMap" hidden>
+      <h3><a id="report-osm" target="_blank" rel="noopener noreferrer">Correggi su OpenStreetMap</a></h3>
+      <p>Aggiungi telefono, sito e orari su OpenStreetMap. Arriveranno anche qui al prossimo aggiornamento dei dati OpenStreetMap.</p>
+    </section>
+    <section aria-label="Segnalazione a CosmoNet">
+      <h3><a id="report-github" target="_blank" rel="noopener noreferrer">Segnala un errore a CosmoNet</a></h3>
+      <p>Serve un account GitHub. La segnalazione sarà pubblica. Evita di inserire dati personali.</p>
+      <p id="report-no-osm" hidden>Per questa farmacia è disponibile solo la segnalazione a CosmoNet.</p>
+    </section>
+    <p>Gli orari da OpenStreetMap sono inseriti da volontari e possono essere vecchi. Chiama sempre la farmacia.</p>
+  </dialog>
   <noscript>Attiva JavaScript per cercare le farmacie e visualizzare la mappa.</noscript>
 </body>
 </html>

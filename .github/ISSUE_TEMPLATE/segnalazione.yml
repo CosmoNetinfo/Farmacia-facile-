@@ -1,0 +1,51 @@
+name: Segnala un errore su una farmacia
+description: Segnala un dato errato o mancante in Farmacia Vicino.
+title: "Segnalazione: "
+labels:
+  - segnalazione
+body:
+  - type: markdown
+    attributes:
+      value: La segnalazione sarà pubblica. Evita di inserire dati personali.
+  - type: input
+    id: id-ministeriale
+    attributes:
+      label: ID ministeriale
+      description: La scheda della farmacia compila questo campo automaticamente.
+  - type: input
+    id: farmacia
+    attributes:
+      label: Nome della farmacia
+    validations:
+      required: true
+  - type: input
+    id: comune-provincia
+    attributes:
+      label: Comune e provincia
+      placeholder: Bologna (BO)
+    validations:
+      required: true
+  - type: dropdown
+    id: problema
+    attributes:
+      label: Tipo di problema
+      options:
+        - Telefono
+        - Orari
+        - Indirizzo
+        - Farmacia chiusa o trasferita
+        - Altro
+    validations:
+      required: true
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: Descrizione
+      description: Indica il dato da correggere e, se lo conosci, quello aggiornato.
+    validations:
+      required: true
+  - type: input
+    id: fonte
+    attributes:
+      label: Fonte della correzione
+      description: Indica come hai verificato il dato. Puoi aggiungere un link pubblico.
