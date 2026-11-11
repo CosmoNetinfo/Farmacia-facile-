@@ -108,6 +108,7 @@ h2 { font-size: clamp(29px, 3vw, 40px); line-height: 1.14; letter-spacing: -.055
 .card-address, .card-hours { color: var(--muted); font-size: 12px; margin-top: 2px; overflow-wrap: anywhere; }
 .card-hours { display: flex; align-items: start; gap: 6px; }
 .card-hours .icon { margin-top: .21em; }
+.card-hours.daily-hours, .leaflet-popup-content .daily-hours { color: var(--green-dark); font-weight: 700; }
 .status-badge { color: #05603b; font-size: 10px; font-weight: 800; background: #e3f6ec; border-radius: 999px; padding: 3px 7px; white-space: nowrap; }
 .card-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 13px; margin: 8px 0 0 45px; }
 .card-action { display: inline-flex; align-items: center; gap: 5px; color: var(--green-dark); border: 0; background: transparent; font-size: 12px; font-weight: 800; padding: 2px 0; }
@@ -159,6 +160,7 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
 .sources-dialog section:last-child { margin-bottom: 0; }
 .sources-dialog h3 { margin-bottom: 3px; font-size: 15px; }
 .sources-dialog p { color: var(--muted); font-size: 14px; }
+.sources-dialog p + p { margin-top: 6px; }
 .sources-dialog a { color: var(--green-dark); font-weight: 800; }
 
 @media (min-width: 861px) {
