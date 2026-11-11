@@ -225,6 +225,12 @@ function dailyHours(pharmacy) {
 function dailyText(daily) {
   return "Orari del " + shortDate.format(new Date(daily.date + "T00:00:00Z")) + " · " + daily.hours;
 }
+function pharmacyTurn(pharmacy) {
+  return pharmacy.turn?.date === regionalDay ? pharmacy.turn : undefined;
+}
+function turnText(turn) {
+  return "Di turno · " + turn.date.split("-").reverse().join("/") + " · " + turn.hours;
+}
 function opensAllDay(pharmacy) {
   const daily = dailyHours(pharmacy);
   return pharmacy.info?.alwaysOpen && (!daily || daily.hours === "00:00–24:00");
@@ -270,6 +276,7 @@ function card(pharmacy) {
   const head = element("div", "card-head");
   const content = element("div", "card-text");
   const daily = dailyHours(pharmacy);
+  const turn = pharmacyTurn(pharmacy);
   const hours = pharmacy.info?.hours;
   content.append(
     element("h3", "card-title", pharmacy.name),
@@ -277,6 +284,7 @@ function card(pharmacy) {
   );
   if (pharmacy.distance !== undefined) content.append(element("p", "card-distance", distanceLabel(pharmacy.distance)));
   if (daily) content.append(withIcon(element("p", "card-hours daily-hours"), "clock", dailyText(daily)));
+  if (turn) content.append(withIcon(element("p", "card-hours daily-hours"), "clock", turnText(turn)));
   if (hours || !daily) {
     content.append(withIcon(element("p", "card-hours"), "clock", daily ? "Orario abituale · " + hours : hours || "Orari non disponibili"));
   }
@@ -308,6 +316,7 @@ function card(pharmacy) {
   actions.append(report);
   if (pharmacy.info?.source) actions.append(external("Fonte OSM", pharmacy.info.source, "card-source"));
   if (daily) actions.append(external(daily.label, daily.source, "card-source"));
+  if (turn) actions.append(external(turn.label, turn.source, "card-source"));
   row.append(actions);
   return row;
 }
@@ -349,12 +358,14 @@ function fitMarkers() {
 function popupContent(pharmacy) {
   const content = element("div");
   const daily = dailyHours(pharmacy);
+  const turn = pharmacyTurn(pharmacy);
   content.append(
     element("strong", "", pharmacy.name),
     element("p", "", addressLine(pharmacy))
   );
   if (pharmacy.distance !== undefined) content.append(element("p", "card-distance", distanceLabel(pharmacy.distance)));
   if (daily) content.append(element("p", "daily-hours", dailyText(daily)));
+  if (turn) content.append(element("p", "daily-hours", turnText(turn)));
   if (pharmacy.info?.hours) content.append(element("p", "", daily ? "Orario abituale · " + pharmacy.info.hours : pharmacy.info.hours));
   const actions = element("div", "popup-actions");
   actions.append(external("Indicazioni ↗", directions(pharmacy)));
@@ -366,6 +377,7 @@ function popupContent(pharmacy) {
   if (pharmacy.info?.site) actions.append(external("Sito web ↗", pharmacy.info.site));
   if (pharmacy.info?.source) actions.append(external("Fonte OSM", pharmacy.info.source));
   if (daily) actions.append(external(daily.label, daily.source));
+  if (turn) actions.append(external(turn.label, turn.source));
   content.append(actions);
   return content;
 }
@@ -436,13 +448,17 @@ function render(refreshMap = true) {
   else updateSelection();
 }
 
+let turnRefreshTimer;
 function loadRegionalHours() {
+  clearTimeout(turnRefreshTimer);
   if (!city || !pharmacies.length) return;
+  const turnDelay = regionalHours.turnRefreshDelay?.(city);
+  if (turnDelay !== undefined) turnRefreshTimer = setTimeout(refreshRegionalDay, turnDelay);
   const requestedCity = city;
   const requestedDay = regionalDay;
   const rows = pharmacies;
   regionalHours.load(requestedCity, rows, requestedDay)?.then(() => {
-    if (city !== requestedCity || regionalDay !== requestedDay || !rows.some(dailyHours)) return;
+    if (city !== requestedCity || regionalDay !== requestedDay || !rows.some(row => dailyHours(row) || pharmacyTurn(row))) return;
     const popup = markers.get(selection);
     const open = popup?.isPopupOpen();
     const mapChanges = filter.value === "hours" || filter.value === "24h";
@@ -454,13 +470,16 @@ function loadRegionalHours() {
     }
   });
 }
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden || !city) return;
+function refreshRegionalDay() {
+  if (!city) return;
   const date = regionalHours.today();
   if (date === regionalDay) return;
   regionalDay = date;
   render();
   loadRegionalHours();
+}
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) refreshRegionalDay();
 });
 
 function renderProvinceOptions() {
@@ -565,6 +584,7 @@ function appendNearbyBatch() {
 function showNearby(origin) {
   nearby = rankNearby(origin);
   city = undefined;
+  clearTimeout(turnRefreshTimer);
   selectedPlace = undefined;
   cityInput.value = "";
   cityInput.setCustomValidity("");
@@ -876,6 +896,7 @@ function restoreCity() {
   if (!nextCity) {
     resetLocation();
     city = undefined;
+    clearTimeout(turnRefreshTimer);
     pharmacies = [];
     selection = undefined;
     selectedPlace = undefined;
