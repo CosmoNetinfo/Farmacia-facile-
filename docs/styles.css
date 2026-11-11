@@ -191,6 +191,8 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
   .area-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
+  body:has(#risultati[hidden]) > main { flex: 0 0 auto; }
+  body:has(#risultati[hidden]) > footer { flex: 1; }
   .report-contact-links { grid-template-columns: 1fr; }
   .wrap { width: calc(100% - 32px); }
   .topbar-inner { min-height: 52px; }
