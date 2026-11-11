@@ -192,16 +192,23 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
 @media (max-width: 560px) {
   .report-contact-links { grid-template-columns: 1fr; }
   .wrap { width: calc(100% - 32px); }
-  .topbar-inner { min-height: 61px; }
+  .topbar-inner { min-height: 52px; }
   .topbar nav { gap: 12px; font-size: 11px; }
   .topbar nav .nav-active { display: none; }
   .brand { font-size: 20px; gap: 7px; }
   .brand-mark { width: 31px; height: 31px; }
-  h1 { max-width: 13ch; margin-inline: auto; }
+  .hero-inner { padding-block: 18px 14px; }
+  h1 { font-size: clamp(30px, 8.4vw, 40px); }
+  .hero-copy { margin-block: 8px 12px; font-size: 14px; line-height: 1.4; }
+  #use-location { min-height: 48px; padding-block: 8px; font-size: 16px; }
+  .search-divider { margin-block: 6px; font-size: 12px; }
+  .search { padding: 3px; }
+  .data-trust { margin-top: 8px; font-size: 12px; line-height: 1.4; }
   .primary { padding-inline: 13px; gap: 7px; }
   .quick-search { gap: 5px; }
   .quick-search > span { width: 100%; }
-  .explore { padding-block: 22px 24px; }
+  .explore { padding-block: 15px 16px; }
+  .explore h2 { margin-bottom: 8px; }
   .area-options { gap: 6px; }
   .area-options button { justify-content: center; min-height: 45px; padding: 6px; gap: 4px; font-size: 12px; white-space: nowrap; }
   .area-options button > [data-icon]:first-child { display: none; }
@@ -210,6 +217,8 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
   .directory { padding-block: 24px 30px; }
   .section-heading { align-items: start; flex-wrap: wrap; gap: 10px; margin-bottom: 13px; }
   #map { height: min(60vh, 430px); min-height: 310px; }
+  .footer-inner { padding-block: 10px 12px; gap: 6px 12px; }
+  .footer-notice { font-size: 12px; line-height: 1.4; }
 }
 @media (min-width: 561px) {
   #use-location { width: auto; justify-self: center; }
