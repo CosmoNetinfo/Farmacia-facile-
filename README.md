@@ -10,6 +10,7 @@ Sviluppata da [CosmoNet.info](https://www.cosmonet.info/).
 
 ## Cosa fa oggi
 
+- **Farmacie vicino a te**: premendo «Usa la mia posizione», l’app mostra le prime 20 farmacie entro 50 km, ordinate per distanza in linea d’aria. «Mostra altre» aggiunge altri risultati. La mappa mostra i segnaposti delle farmacie e della tua posizione.
 - **Ricerca per comune o frazione**, con suggerimenti mentre scrivi. Accenti e apostrofi non contano, e i comuni fusi o rinominati portano al comune attuale.
 - **Navigazione per zona**: Nord, Centro, Sud e isole, poi regione, provincia e comune.
 - **Elenco e mappa** (Leaflet + OpenStreetMap), sei schede per pagina, con passaggio rapido da una vista all'altra.
@@ -35,7 +36,7 @@ L'anagrafe ha data 11 novembre 2026, l'estrazione OpenStreetMap 10 novembre 2026
 
 ## Limiti attuali (beta)
 
-- **Non c'è ancora la ricerca per posizione**: non puoi vedere le farmacie intorno a te con un tasto.
+- La ricerca per posizione include solo le farmacie con coordinate. Gli orari del giorno di FVG e Bolzano si consultano nella ricerca per comune.
 - Gli orari del giorno coprono solo FVG e Bolzano. Per il resto d'Italia mancano o arrivano solo da OpenStreetMap, dove sono volontari a inserirli.
 - Telefoni, siti e orari da OpenStreetMap sono abbinati alle farmacie in modo prudente: se l'abbinamento è dubbio, il dato non viene mostrato.
 - Alcuni segnaposto sulla mappa possono essere approssimativi.
@@ -108,6 +109,8 @@ poi apri `http://localhost:8080`.
 ## Privacy
 
 Il codice non richiede account e non salva dati personali. Il browser però contatta alcuni servizi esterni: i server di OpenStreetMap per i riquadri della mappa, Google Fonts per i caratteri, e, solo per i comuni di FVG e Bolzano, i server regionali per gli orari. Il pulsante "Indicazioni" apre Google Maps.
+
+La posizione si chiede solo quando premi «Usa la mia posizione». L’app calcola le distanze sul dispositivo e tiene le coordinate in memoria per la ricerca corrente, senza inviarle a servizi esterni, inserirle nell’URL o salvarle nel browser. In questa vista la mappa mostra i segnaposti su una griglia locale, senza richieste ai server della cartografia.
 
 ## Contribuire
 

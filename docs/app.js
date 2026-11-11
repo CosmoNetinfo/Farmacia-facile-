@@ -84,6 +84,7 @@ function communityDetails(id) {
 }
 const collator = new Intl.Collator("it", { sensitivity: "base" });
 const number = new Intl.NumberFormat("it-IT");
+const kilometers = new Intl.NumberFormat("it-IT", { maximumFractionDigits: 1 });
 const normalize = text => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 const smallWords = new Set(["a", "al", "alla", "alle", "all'", "con", "dai", "dal", "de", "dei", "del", "della", "delle", "dell'", "di", "e", "in", "sul"]);
 function titleCase(text) {
@@ -153,6 +154,10 @@ const cityInput = byId("city");
 const suggestions = byId("suggestions");
 const filter = byId("filter");
 const mapNotice = byId("map-empty");
+const mapElement = byId("map");
+const locationButton = byId("use-location");
+const locationStatus = byId("location-status");
+const showMore = byId("show-more");
 const areaForm = byId("area-form");
 const areaRegion = byId("area-region");
 const areaProvince = byId("area-province");
@@ -164,7 +169,11 @@ const shortDate = new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "sho
 let regionalDay = regionalHours.today();
 
 const pageSize = 6;
+const nearbyBatchSize = 20;
+const nearbyRadius = 50;
 let city;
+let nearby;
+let locationRequest;
 let pharmacies = [];
 let page = 0;
 let selection;
@@ -175,28 +184,33 @@ let selectedPlace;
 let markers = new Map();
 let tileFailed = false;
 
-const map = window.L ? L.map("map", { scrollWheelZoom: false, zoomControl: false, zoomSnap: 0.5, maxZoom: 19 }) : null;
+const map = window.L ? L.map(mapElement, { scrollWheelZoom: false, zoomControl: false, zoomAnimation: false, zoomSnap: 0.5, maxZoom: 19 }) : null;
 let layer;
+let baseLayer;
 if (map) {
   L.control.zoom({ position: "bottomright" }).addTo(map);
-  const base = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  baseLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxNativeZoom: 19, maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   });
-  base.on("tileerror", () => { tileFailed = true; updateMapNotice(); });
-  base.on("tileload", () => { tileFailed = false; updateMapNotice(); });
-  base.addTo(map);
+  baseLayer.on("tileerror", () => { tileFailed = true; updateMapNotice(); });
+  baseLayer.on("tileload", () => { tileFailed = false; updateMapNotice(); });
   layer = L.layerGroup().addTo(map);
 }
 
 function addressLine(pharmacy) {
-  return [pharmacy.address, [pharmacy.postcode, city.label].filter(Boolean).join(" ")].filter(Boolean).join(" · ");
+  const town = pharmacy.town.label + (nearby ? " (" + pharmacy.town.province + ")" : "");
+  return [pharmacy.address, [pharmacy.postcode, town].filter(Boolean).join(" ")].filter(Boolean).join(" · ");
 }
 function directions(pharmacy) {
   const destination = pharmacy.address || !pharmacy.coords
-    ? addressLine(pharmacy) + ", " + city.province + ", Italia"
+    ? addressLine(pharmacy) + (nearby ? "" : ", " + pharmacy.town.province) + ", Italia"
     : pharmacy.coords.join(",");
   return "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(destination);
+}
+function distanceLabel(distance) {
+  const meters = Math.round(distance * 1000);
+  return meters < 1000 ? number.format(meters) + " m" : kilometers.format(distance) + " km";
 }
 function dailyHours(pharmacy) {
   return pharmacy.daily?.date === regionalDay ? pharmacy.daily : undefined;
@@ -219,6 +233,7 @@ function card(pharmacy) {
     element("h3", "card-title", pharmacy.name),
     element("p", "card-address", addressLine(pharmacy))
   );
+  if (pharmacy.distance !== undefined) content.append(element("p", "card-distance", distanceLabel(pharmacy.distance)));
   if (daily) content.append(withIcon(element("p", "card-hours daily-hours"), "clock", dailyText(daily)));
   if (hours || !daily) {
     content.append(withIcon(element("p", "card-hours"), "clock", daily ? "Orario abituale · " + hours : hours || "Orari non disponibili"));
@@ -271,16 +286,17 @@ function updateSelection() {
 }
 function updateMapNotice() {
   const message = !map ? "Mappa non disponibile. Le indicazioni restano accessibili dalle schede."
-    : !markers.size ? "Nessun segnaposto per questi risultati."
-    : tileFailed ? "Sfondo della mappa in caricamento. Puoi selezionare i segnaposti." : "";
+    : !markers.size && !nearby ? "Nessun segnaposto per questi risultati."
+    : tileFailed && !nearby ? "Sfondo della mappa in caricamento. Puoi selezionare i segnaposti." : "";
   mapNotice.textContent = message;
   mapNotice.hidden = !message;
 }
 function fitMarkers() {
-  if (!map || !markers.size || !byId("map").clientWidth) return;
+  if (!map || !mapElement.clientWidth) return;
   const points = [...markers.values()].map(marker => marker.getLatLng());
-  if (points.length === 1) map.setView(points[0], 16);
-  else map.fitBounds(L.latLngBounds(points), { padding: [52, 48], maxZoom: 16, animate: false });
+  if (nearby) points.push(nearby.origin);
+  if (points.length > 1) map.fitBounds(L.latLngBounds(points), { padding: [52, 48], maxZoom: 16, animate: false });
+  else if (points.length) map.setView(points[0], 16, { animate: false });
 }
 function popupContent(pharmacy) {
   const content = element("div");
@@ -289,6 +305,7 @@ function popupContent(pharmacy) {
     element("strong", "", pharmacy.name),
     element("p", "", addressLine(pharmacy))
   );
+  if (pharmacy.distance !== undefined) content.append(element("p", "card-distance", distanceLabel(pharmacy.distance)));
   if (daily) content.append(element("p", "daily-hours", dailyText(daily)));
   if (pharmacy.info?.hours) content.append(element("p", "", daily ? "Orario abituale · " + pharmacy.info.hours : pharmacy.info.hours));
   const actions = element("div", "popup-actions");
@@ -304,12 +321,28 @@ function popupContent(pharmacy) {
   content.append(actions);
   return content;
 }
+function fitMapView() {
+  if (!mapElement.clientWidth) return;
+  map.invalidateSize({ pan: false });
+  if (markers.size || nearby) fitMarkers();
+  else {
+    const point = pharmacies.find(pharmacy => pharmacy.coords)?.coords;
+    map.setView(point || [42.5, 12.5], point ? 13 : 5, { animate: false });
+  }
+  // Set the municipal view before attaching the tile layer again.
+  if (city && !map.hasLayer(baseLayer)) baseLayer.addTo(map);
+}
 function updateMap(matches) {
-  const rows = view === "map" ? matches : pageRows(matches);
+  const rows = view === "map" || nearby ? matches : pageRows(matches);
   const located = rows.filter(pharmacy => pharmacy.coords);
   byId("map-count").textContent = number.format(located.length) + (located.length === 1 ? " farmacia sulla mappa" : " farmacie sulla mappa");
-  byId("map-fit").disabled = !map || !located.length;
+  byId("map-fit").disabled = !map || (!located.length && !nearby);
+  byId("user-legend").hidden = !map || !nearby;
+  byId("nearby-map-note").hidden = !map || !nearby;
+  mapElement.classList.toggle("nearby-map", Boolean(nearby));
   if (map) {
+    if (!city || !mapElement.clientWidth) baseLayer.remove();
+    if (map.getZoom() !== undefined) map.stop();
     layer.clearLayers();
     markers = new Map();
     const pin = L.divIcon({ className: "map-pin", html: "<span>" + icon("cross") + "</span>", iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -28] });
@@ -323,11 +356,14 @@ function updateMap(matches) {
       });
       markers.set(pharmacy.id, marker);
     });
-    if (byId("map").clientWidth) {
-      map.invalidateSize({ pan: false });
-      if (markers.size) fitMarkers();
-      else map.setView(pharmacies.find(pharmacy => pharmacy.coords)?.coords || [42.5, 12.5], pharmacies.some(pharmacy => pharmacy.coords) ? 13 : 5);
+    if (nearby) {
+      const target = L.divIcon({ className: "user-pin", html: icon("target"), iconSize: [30, 30] });
+      const label = "La tua posizione";
+      const marker = L.marker(nearby.origin, { icon: target, title: label, zIndexOffset: 2000 }).addTo(layer);
+      marker.getElement()?.setAttribute("aria-label", label);
+      marker.bindPopup(label);
     }
+    fitMapView();
   }
   updateSelection();
   updateMapNotice();
@@ -337,7 +373,10 @@ function render(refreshMap = true) {
   const pages = Math.max(1, Math.ceil(matches.length / pageSize));
   page = Math.min(page, pages - 1);
   const rows = pageRows(matches);
-  byId("result-count").textContent = number.format(matches.length) + (matches.length === 1 ? " farmacia trovata" : " farmacie trovate");
+  byId("result-count").textContent = nearby && !nearby.ranked.length
+    ? "Nessuna farmacia trovata entro 50 km. Puoi cercare per comune o frazione."
+    : number.format(matches.length) + (matches.length === 1 ? " farmacia trovata" : " farmacie trovate");
+  showMore.hidden = !nearby || pharmacies.length >= nearby.ranked.length;
   list.replaceChildren(...rows.map(card));
   byId("empty-list").hidden = matches.length > 0;
   byId("empty-list").textContent = "Nessuna farmacia corrisponde a questo filtro.";
@@ -390,7 +429,28 @@ function renderProvinceOptions() {
     container.append(button);
   }
 }
+function toPharmacy([id, name, address, postcode, coords, type, village, localities], town, distance) {
+  const official = verified[id];
+  const info = official && normalize(official.registryAddress) === normalize(address) ? official : communityDetails(id);
+  const standardName = name === name.toLocaleUpperCase("it-IT") ? titleCase(name) : name;
+  const fullName = /\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(standardName)
+    ? standardName : (type.toLowerCase().includes("dispensario") ? "Dispensario " : "Farmacia ") + standardName;
+  const street = info?.address || (address === address.toLocaleUpperCase("it-IT") ? titleCase(address) : address);
+  return { id, name: info?.name || fullName, registryAddress: address, address: [street, villageName(village) || localities[0]].filter(value => value && value !== "-").join(", "), postcode: postcode === "-" ? "" : postcode, coords, info, town, distance };
+}
+function focusResults() {
+  directory.focus({ preventScroll: true });
+  directory.scrollIntoView({ block: "start" });
+}
+function resetLocation() {
+  locationRequest = undefined;
+  locationButton.removeAttribute("aria-disabled");
+  locationStatus.textContent = "";
+  nearby = undefined;
+  byId("nearby-coverage").hidden = true;
+}
 function showCity(nextCity, scroll = false) {
+  resetLocation();
   city = nextCity;
   regionalDay = regionalHours.today();
   directory.hidden = false;
@@ -399,15 +459,7 @@ function showCity(nextCity, scroll = false) {
   filter.value = "all";
   const sortDistance = ([lat, lon]) => (lat - 44.494) ** 2 + ((lon - 11.344) * 0.71) ** 2;
   const rows = city.locality ? city.pharmacies.filter(row => row[7].some(label => normalize(label) === normalize(city.locality))) : city.pharmacies;
-  pharmacies = rows.map(([id, name, address, postcode, coords, type, village, localities]) => {
-    const official = verified[id];
-    const info = official && normalize(official.registryAddress) === normalize(address) ? official : communityDetails(id);
-    const standardName = name === name.toLocaleUpperCase("it-IT") ? titleCase(name) : name;
-    const fullName = /\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(standardName)
-      ? standardName : (type.toLowerCase().includes("dispensario") ? "Dispensario " : "Farmacia ") + standardName;
-    const street = info?.address || (address === address.toLocaleUpperCase("it-IT") ? titleCase(address) : address);
-    return { id, name: info?.name || fullName, registryAddress: address, address: [street, villageName(village) || localities[0]].filter(value => value && value !== "-").join(", "), postcode: postcode === "-" ? "" : postcode, coords, info };
-  }).sort((a, b) => {
+  pharmacies = rows.map(row => toPharmacy(row, city)).sort((a, b) => {
     if (city.key === "bologna") {
       const curatedOrder = [16606, 6995, 6992];
       const rank = row => curatedOrder.includes(row.id) ? curatedOrder.indexOf(row.id) : curatedOrder.length;
@@ -428,9 +480,115 @@ function showCity(nextCity, scroll = false) {
   byId("result-title").textContent = "Farmacie a " + (city.locality || city.label);
   render();
   loadRegionalHours();
-  if (scroll) {
-    directory.focus({ preventScroll: true });
-    directory.scrollIntoView({ block: "start" });
+  if (scroll) focusResults();
+}
+
+function rankNearby(origin) {
+  const radians = Math.PI / 180;
+  const latitude = origin[0] * radians;
+  const cosLatitude = Math.cos(latitude);
+  const ranked = [];
+  let excluded = 0;
+  for (const town of cities) {
+    for (const row of town.pharmacies) {
+      const coords = row[4];
+      if (!coords || !Number.isFinite(coords[0]) || !Number.isFinite(coords[1]) ||
+          Math.abs(coords[0]) > 90 || Math.abs(coords[1]) > 180) {
+        excluded++;
+        continue;
+      }
+      const targetLatitude = coords[0] * radians;
+      const deltaLongitude = (coords[1] - origin[1]) * radians;
+      const haversine = Math.sin((targetLatitude - latitude) / 2) ** 2 +
+        cosLatitude * Math.cos(targetLatitude) * Math.sin(deltaLongitude / 2) ** 2;
+      const distance = 2 * 6371 * Math.asin(Math.sqrt(Math.min(1, haversine)));
+      if (distance <= nearbyRadius) ranked.push({ row, town, distance });
+    }
+  }
+  ranked.sort((a, b) => a.distance - b.distance || a.row[0] - b.row[0]);
+  return { origin, ranked, excluded };
+}
+function appendNearbyBatch() {
+  const start = pharmacies.length;
+  for (const { row, town, distance } of nearby.ranked.slice(start, start + nearbyBatchSize)) {
+    pharmacies.push(toPharmacy(row, town, distance));
+  }
+}
+function showNearby(origin) {
+  nearby = rankNearby(origin);
+  city = undefined;
+  selectedPlace = undefined;
+  cityInput.value = "";
+  cityInput.setCustomValidity("");
+  clearSuggestions();
+  const url = new URL(window.location.href);
+  for (const param of ["comune", "provincia", "frazione"]) url.searchParams.delete(param);
+  url.hash = "risultati";
+  if (url.href !== window.location.href) window.history.pushState(null, "", url);
+
+  pharmacies = [];
+  appendNearbyBatch();
+  page = 0;
+  selection = undefined;
+  filter.value = "all";
+  directory.hidden = false;
+  const hasPharmacies = pharmacies.length > 0;
+  byId("result-grid").hidden = !hasPharmacies;
+  byId("view-toggle").hidden = !hasPharmacies;
+  byId("no-pharmacies").hidden = true;
+  byId("result-title").textContent = "Farmacie vicino a te";
+  withIcon(byId("location-label"), "target", "Entro 50 km");
+  const coverage = byId("nearby-coverage");
+  coverage.textContent = "Distanze in linea d’aria. " + number.format(nearby.excluded) +
+    (nearby.excluded === 1 ? " farmacia esclusa" : " farmacie escluse") + " dalla ricerca per posizione perché prive di coordinate.";
+  coverage.hidden = false;
+  render();
+  focusResults();
+}
+function requestLocation() {
+  if (locationRequest) return;
+  if (!window.isSecureContext) {
+    locationStatus.textContent = "La ricerca per posizione richiede HTTPS. Puoi cercare per comune o frazione.";
+    return;
+  }
+  const request = {};
+  locationRequest = request;
+  locationButton.setAttribute("aria-disabled", "true");
+  locationStatus.textContent = "In attesa del permesso di usare la posizione. Controlla la richiesta del browser.";
+  const finish = message => {
+    locationRequest = undefined;
+    locationButton.removeAttribute("aria-disabled");
+    locationStatus.textContent = message;
+  };
+  const unavailable = "Posizione non disponibile. Riprova o cerca per comune o frazione.";
+  try {
+    navigator.geolocation.getCurrentPosition(({ coords }) => {
+      if (locationRequest !== request) return;
+      locationStatus.textContent = "Ricerca delle farmacie vicine in corso…";
+      // Let the status reach the browser before scanning the directory.
+      setTimeout(() => {
+        if (locationRequest !== request) return;
+        const { latitude, longitude } = coords;
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+            Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+          finish(unavailable);
+          return;
+        }
+        finish("");
+        showNearby([latitude, longitude]);
+      }, 0);
+    }, error => {
+      if (locationRequest !== request) return;
+      if (error.code === 1) {
+        finish("Permesso negato. Puoi cambiare il permesso nelle impostazioni del browser oppure cercare per comune o frazione.");
+      } else if (error.code === 3) {
+        finish("Tempo scaduto per ottenere la posizione. Riprova o cerca per comune o frazione.");
+      } else {
+        finish(unavailable);
+      }
+    }, { timeout: 10000 });
+  } catch {
+    finish(unavailable);
   }
 }
 
@@ -594,13 +752,23 @@ areaForm.addEventListener("submit", event => {
 });
 
 filter.addEventListener("change", () => { page = 0; selection = undefined; render(); });
+showMore.addEventListener("click", () => {
+  if (!nearby) return;
+  const previousCount = getMatches().length;
+  appendNearbyBatch();
+  if (getMatches().length > previousCount) {
+    page = Math.floor(previousCount / pageSize);
+    selection = undefined;
+  }
+  render();
+  focusResults();
+});
 for (const [button, step] of [[byId("prev"), -1], [byId("next"), 1]]) {
   button.addEventListener("click", () => {
     page += step;
     selection = undefined;
     render();
-    directory.focus({ preventScroll: true });
-    directory.scrollIntoView({ block: "start" });
+    focusResults();
   });
 }
 
@@ -633,11 +801,11 @@ list.addEventListener("click", event => {
 });
 if (map) {
   const observer = new ResizeObserver(() => {
-    if (!byId("map").clientWidth) return;
-    map.invalidateSize({ pan: false });
-    if (markers.size && !selection) fitMarkers();
+    if (!mapElement.clientWidth) return;
+    if (!selection) fitMapView();
+    else map.invalidateSize({ pan: false });
   });
-  observer.observe(byId("map"));
+  observer.observe(mapElement);
 }
 function cityFromUrl() {
   const params = new URLSearchParams(window.location.search);
@@ -652,12 +820,16 @@ function cityFromUrl() {
 function restoreCity() {
   const nextCity = cityFromUrl();
   if (!nextCity) {
+    resetLocation();
     city = undefined;
+    pharmacies = [];
+    selection = undefined;
     selectedPlace = undefined;
     cityInput.value = "";
     cityInput.setCustomValidity("");
     clearSuggestions();
     directory.hidden = true;
+    updateMap([]);
     return;
   }
   if (city?.code === nextCity.code && city.locality === nextCity.locality) return;
@@ -665,6 +837,10 @@ function restoreCity() {
   showCity(nextCity);
 }
 if (cities.length && window.farmacie?.date) {
+  if (navigator.geolocation) {
+    locationButton.hidden = false;
+    locationButton.addEventListener("click", requestLocation);
+  }
   const snapshot = document.querySelector("#fonti time");
   const dateFormat = new Intl.DateTimeFormat("it-IT", { dateStyle: "long", timeZone: "UTC" });
   snapshot.dateTime = window.farmacie.date;

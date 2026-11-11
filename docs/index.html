@@ -49,15 +49,19 @@
         <p class="eyebrow"><span data-icon="pin"></span> Il cerca-farmacie italiano</p>
         <h1 id="titolo">Trova la tua farmacia<span>.</span></h1>
         <p class="hero-copy">Cerca per comune o frazione e consulta indirizzi, orari e recapiti disponibili.</p>
-        <form id="search" class="search" role="search">
-          <div class="search-field">
-            <label for="city" class="sr-only">Comune o frazione</label>
-            <span class="search-icon" data-icon="search"></span>
-            <input id="city" type="search" placeholder="Comune o frazione" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false" required>
-            <ul id="suggestions" role="listbox" hidden></ul>
-          </div>
-          <button type="submit" class="primary">Cerca <span data-icon="arrow-right"></span></button>
-        </form>
+        <div class="search-tools">
+          <form id="search" class="search" role="search">
+            <div class="search-field">
+              <label for="city" class="sr-only">Comune o frazione</label>
+              <span class="search-icon" data-icon="search"></span>
+              <input id="city" type="search" placeholder="Comune o frazione" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false" required>
+              <ul id="suggestions" role="listbox" hidden></ul>
+            </div>
+            <button type="submit" class="primary">Cerca <span data-icon="arrow-right"></span></button>
+          </form>
+          <button id="use-location" type="button" class="secondary" aria-describedby="location-status" hidden><span data-icon="target"></span> Usa la mia posizione</button>
+        </div>
+        <p id="location-status" role="status" aria-live="polite"></p>
       </div>
     </section>
 
@@ -90,6 +94,7 @@
         </div>
       </div>
 
+      <p id="nearby-coverage" hidden></p>
       <div id="no-pharmacies" class="empty no-pharmacies" hidden>
         <p>Nell’anagrafe del Ministero della Salute non risultano farmacie per questo comune.</p>
         <div id="other-cities" class="quick-search"></div>
@@ -125,10 +130,15 @@
               <div id="map" aria-label="Mappa interattiva delle farmacie"></div>
               <p id="map-empty" class="map-notice" hidden></p>
             </div>
-            <div class="map-bottom"><span class="legend-dot"></span> <span id="map-count">Farmacie sulla mappa</span></div>
+            <div class="map-bottom">
+              <span class="map-legend"><span class="legend-dot" aria-hidden="true"></span> <span id="map-count">Farmacie sulla mappa</span></span>
+              <span id="user-legend" class="map-legend" hidden><span data-icon="target"></span> La tua posizione</span>
+            </div>
+            <p id="nearby-map-note" class="map-bottom" hidden>Per proteggere la tua posizione, questa vista mostra i segnaposti senza caricare la cartografia stradale.</p>
           </div>
         </div>
       </div>
+      <button id="show-more" type="button" class="secondary" hidden>Mostra altre</button>
     </section>
   </main>
 
