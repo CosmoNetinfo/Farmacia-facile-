@@ -25,7 +25,7 @@
         <img class="brand-mark" src="favicon.svg" alt="" width="36" height="36"><span>Farmacia<span class="brand-accent">Vicino</span></span>
       </a>
       <nav aria-label="Navigazione principale">
-        <a class="nav-active" href="#risultati">Esplora farmacie</a>
+        <a class="nav-active" href="#esplora">Esplora farmacie</a>
         <a href="#fonti">Fonti dei dati <span data-icon="arrow-down-right"></span></a>
       </nav>
     </div>
@@ -35,7 +35,7 @@
     <section class="hero" aria-labelledby="titolo">
       <div class="hero-art" aria-hidden="true">
         <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div>
-        <div class="art-pin"><span data-icon="pin"></span></div>
+        <div class="art-pin"><img src="favicon.svg" width="64" height="64" alt=""></div>
         <div class="art-cross" data-icon="plus"></div>
       </div>
       <div class="wrap hero-inner">
@@ -51,23 +51,31 @@
           </div>
           <button type="submit" class="primary">Cerca <span data-icon="arrow-right"></span></button>
         </form>
-        <div class="quick-search">
-          <span>Città popolari</span>
-          <button type="button" data-city="Bologna">Bologna</button>
-          <button type="button" data-city="Milano">Milano</button>
-          <button type="button" data-city="Roma">Roma</button>
-          <button type="button" data-city="Napoli">Napoli</button>
-          <button type="button" data-city="Torino">Torino</button>
-        </div>
       </div>
     </section>
 
-    <section id="risultati" class="wrap directory" aria-labelledby="result-title" tabindex="-1">
+    <section id="esplora" class="wrap explore" aria-labelledby="explore-title">
+      <h2 id="explore-title">Sfoglia per zona</h2>
+      <div class="area-options" role="group" aria-label="Zona d’Italia">
+        <button type="button" data-area="nord" aria-controls="area-form" aria-pressed="false"><span data-icon="map"></span>Nord<span class="area-arrow" data-icon="arrow-right"></span></button>
+        <button type="button" data-area="centro" aria-controls="area-form" aria-pressed="false"><span data-icon="map"></span>Centro<span class="area-arrow" data-icon="arrow-right"></span></button>
+        <button type="button" data-area="sud" aria-controls="area-form" aria-pressed="false"><span data-icon="map"></span>Sud e isole<span class="area-arrow" data-icon="arrow-right"></span></button>
+      </div>
+      <form id="area-form" class="area-form" hidden>
+        <label>Regione <select id="area-region" required></select></label>
+        <label>Provincia <select id="area-province" required disabled></select></label>
+        <label>Comune <select id="area-town" required disabled></select></label>
+        <button id="area-submit" type="submit" class="primary" disabled>Mostra farmacie <span data-icon="arrow-right"></span></button>
+      </form>
+      <p id="directory-error" role="status" hidden>L’anagrafe delle farmacie non è disponibile.</p>
+    </section>
+
+    <section id="risultati" class="wrap directory" aria-labelledby="result-title" tabindex="-1" hidden>
       <div class="section-heading">
         <div>
-          <p id="location-label" class="eyebrow"><span data-icon="pin"></span> Emilia-Romagna</p>
-          <h2 id="result-title">Farmacie a Bologna</h2>
-          <p id="result-count" role="status">Caricamento delle farmacie…</p>
+          <p id="location-label" class="eyebrow"></p>
+          <h2 id="result-title">Farmacie</h2>
+          <p id="result-count" role="status"></p>
         </div>
         <div id="view-toggle" class="view-toggle" aria-label="Vista dei risultati">
           <button id="list-view" aria-pressed="true"><span data-icon="list"></span> Elenco</button>
@@ -123,7 +131,7 @@
         <a class="brand" href="#inizio"><img class="brand-mark" src="favicon.svg" alt="" width="26" height="26"><span>Farmacia<span class="brand-accent">Vicino</span></span></a>
         <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0), estrazione del <time datetime="2026-11-10">10 novembre 2026</time>. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
         <p>Elenco dei comuni, denominazioni e fusioni da <a href="https://situas.istat.it/web/" target="_blank" rel="noopener">ISTAT – SITUAS</a>. Le frazioni ricercabili sono quelle riportate nell’anagrafe delle farmacie.</p>
-        <p>Orari e recapiti provengono dai siti delle farmacie o da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, <a href="recapiti-osm.js" download>scarica i dati</a>). <span id="osm-date" hidden></span>Chiama per confermare gli orari, soprattutto nei festivi.</p>
+        <p>Per orari e recapiti diamo priorità ai siti delle farmacie. Dove disponibili, integriamo i dati di <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, <a href="recapiti-osm.js" download>scarica i dati</a>). <span id="osm-date" hidden></span>Chiama per confermare gli orari, soprattutto nei festivi.</p>
       </div>
       <a class="back-top" href="#inizio">Torna su <span data-icon="arrow-up"></span></a>
     </div>

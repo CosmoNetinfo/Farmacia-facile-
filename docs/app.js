@@ -54,6 +54,15 @@ const verified = {
     name: "Antica Farmacia dei Servi", address: "Strada Maggiore, 39", phone: "+39051231638",
     hours: "Lun–ven 08:30–20:00 · Sab–dom 09:00–19:00",
     site: "https://almafarmacie.it/pharmacy/dei-servi/"
+  },
+  16238: {
+    name: "Farmacia De Sotgiu", phone: "+39070403080", hours: "Lun–sab 08:30–20:30",
+    site: "https://www.farmaciadesotgiu.com/"
+  },
+  16245: {
+    name: "Farmacia Dedola", phone: "+39070305829",
+    hours: "Lun–ven 08:30–14:00 e 16:00–20:00 (ott–mar) / 16:30–20:30 (apr–set) · Sab 08:30–14:00",
+    site: "https://www.farmaciadedola.it/"
   }
 };
 const osmContacts = window.recapitiOSM?.records || {};
@@ -91,10 +100,10 @@ function buildCities() {
   const catalog = window.comuniIstat;
   const data = window.farmacie?.cities || [];
   const byCode = new Map();
-  function addCity(code, label, province, region, alias = "") {
+  function addCity(code, label, province, region, alias = "", division, provinceName = province) {
     const key = normalize(label);
     const town = {
-      code, label, key, province, region, provinces: new Set([province]),
+      code, label, key, province, region, division, provinceName, provinces: new Set([province]),
       aliases: new Set([normalize(alias), loosePlaceKey(key)].filter(value => value && value !== key)),
       localities: new Map(), pharmacies: []
     };
@@ -102,8 +111,8 @@ function buildCities() {
     return town;
   }
   const byName = new Map();
-  for (const [code, name, province, region, alias] of catalog?.cities || []) {
-    const town = addCity(code, name, province, region, alias);
+  for (const [code, name, province, region, alias, division, provinceName] of catalog?.cities || []) {
+    const town = addCity(code, name, province, region, alias, division, provinceName);
     if (!byName.has(town.key)) byName.set(town.key, []);
     byName.get(town.key).push(town);
   }
@@ -135,7 +144,12 @@ const cityInput = byId("city");
 const suggestions = byId("suggestions");
 const filter = byId("filter");
 const mapNotice = byId("map-empty");
-const quickLinks = [...document.querySelectorAll("[data-city]")];
+const areaForm = byId("area-form");
+const areaRegion = byId("area-region");
+const areaProvince = byId("area-province");
+const areaTown = byId("area-town");
+const areaSubmit = byId("area-submit");
+const areaButtons = [...document.querySelectorAll("[data-area]")];
 
 const pageSize = 6;
 let city;
@@ -145,6 +159,7 @@ let selection;
 let view = "list";
 let choices = [];
 let activeChoice = -1;
+let selectedPlace;
 let markers = new Map();
 let tileFailed = false;
 
@@ -318,6 +333,7 @@ function renderProvinceOptions() {
 }
 function showCity(nextCity, scroll = false) {
   city = nextCity;
+  directory.hidden = false;
   page = 0;
   selection = undefined;
   filter.value = "all";
@@ -349,7 +365,6 @@ function showCity(nextCity, scroll = false) {
   const location = city.locality ? city.label + " (" + city.province + ")" : city.region + " · " + city.province;
   withIcon(byId("location-label"), "pin", location);
   byId("result-title").textContent = "Farmacie a " + (city.locality || city.label);
-  quickLinks.forEach(button => button.setAttribute("aria-pressed", String(!city.locality && normalize(button.dataset.city) === city.key)));
   render();
   if (scroll) {
     directory.focus({ preventScroll: true });
@@ -388,11 +403,15 @@ function findCities(text) {
   }
   return matches.sort((a, b) => a.rank - b.rank);
 }
-function choose(candidate) {
+function selectPlace(candidate) {
   const duplicate = cities.some(other => other.key === candidate.key && other.province !== candidate.province);
   cityInput.value = (candidate.locality || candidate.label) + (duplicate && !candidate.locality ? " (" + candidate.province + ")" : "");
   cityInput.setCustomValidity("");
+  selectedPlace = candidate;
   clearSuggestions();
+}
+function choose(candidate) {
+  selectPlace(candidate);
   const url = new URL(window.location.href);
   url.searchParams.set("comune", candidate.label);
   url.searchParams.set("provincia", candidate.province);
@@ -413,8 +432,10 @@ function showSuggestions() {
     option.id = "city-option-" + index;
     option.setAttribute("role", "option");
     option.setAttribute("aria-selected", "false");
-    option.addEventListener("pointerdown", event => event.preventDefault());
-    option.addEventListener("click", () => choose({ ...town, locality }));
+    option.addEventListener("pointerdown", event => {
+      if (event.pointerType === "mouse") event.preventDefault();
+    });
+    option.addEventListener("click", () => selectPlace({ ...town, locality }));
     suggestions.append(option);
   });
   suggestions.hidden = false;
@@ -423,6 +444,10 @@ function showSuggestions() {
 
 byId("search").addEventListener("submit", event => {
   event.preventDefault();
+  if (selectedPlace) {
+    choose(selectedPlace);
+    return;
+  }
   const matches = findCities(cityInput.value);
   const first = matches[0];
   const uniqueExact = first?.rank < 3 && first.rank !== matches[1]?.rank;
@@ -436,12 +461,23 @@ byId("search").addEventListener("submit", event => {
     cityInput.reportValidity();
   }
 });
-cityInput.addEventListener("input", showSuggestions);
-cityInput.addEventListener("focus", showSuggestions);
+cityInput.addEventListener("input", () => {
+  selectedPlace = undefined;
+  showSuggestions();
+});
+cityInput.addEventListener("focus", () => {
+  if (!selectedPlace) showSuggestions();
+});
 cityInput.addEventListener("keydown", event => {
   if (event.key === "Escape") {
     if (!suggestions.hidden) event.preventDefault();
     clearSuggestions();
+  }
+  if (event.key === "Enter" && choices[activeChoice]) {
+    event.preventDefault();
+    const { town, locality } = choices[activeChoice];
+    selectPlace({ ...town, locality });
+    return;
   }
   if (!["ArrowDown", "ArrowUp"].includes(event.key) || !choices.length) return;
   event.preventDefault();
@@ -454,12 +490,47 @@ document.addEventListener("pointerdown", event => {
   if (!event.target.closest("#search")) clearSuggestions();
 });
 byId("search").addEventListener("focusout", event => {
-  if (!event.currentTarget.contains(event.relatedTarget)) clearSuggestions();
+  if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) clearSuggestions();
 });
-quickLinks.forEach(button => button.addEventListener("click", () => {
-  const candidate = cities.find(item => item.key === normalize(button.dataset.city));
-  if (candidate) choose(candidate);
-}));
+
+const divisions = { nord: [1, 2], centro: [3], sud: [4, 5] };
+let areaCities = [];
+function setOptions(select, placeholder, options) {
+  select.replaceChildren(new Option(placeholder, ""), ...options.map(([value, label]) => new Option(label, value)));
+  select.disabled = options.length === 0;
+}
+function updateAreaTowns() {
+  const towns = areaCities.filter(town => town.region === areaRegion.value && town.province === areaProvince.value);
+  setOptions(areaTown, "Scegli un comune", towns.map(town => [town.code, town.label]));
+  areaSubmit.disabled = true;
+}
+function updateAreaProvinces() {
+  const provinces = new Map(areaCities.filter(town => town.region === areaRegion.value)
+    .map(town => [town.province, town.provinceName]));
+  setOptions(areaProvince, "Scegli una provincia", [...provinces].sort((a, b) => collator.compare(a[1], b[1])));
+  if (provinces.size === 1) areaProvince.selectedIndex = 1;
+  updateAreaTowns();
+}
+for (const button of areaButtons) {
+  button.addEventListener("click", () => {
+    if (button.getAttribute("aria-pressed") === "true") return;
+    for (const option of areaButtons) option.setAttribute("aria-pressed", String(option === button));
+    areaCities = cities.filter(town => divisions[button.dataset.area].includes(town.division));
+    const regions = [...new Set(areaCities.map(town => town.region))].sort(collator.compare);
+    setOptions(areaRegion, "Scegli una regione", regions.map(name => [name, name]));
+    updateAreaProvinces();
+    areaForm.hidden = false;
+  });
+}
+areaRegion.addEventListener("change", updateAreaProvinces);
+areaProvince.addEventListener("change", updateAreaTowns);
+areaTown.addEventListener("change", () => { areaSubmit.disabled = !areaTown.value; });
+areaForm.addEventListener("submit", event => {
+  event.preventDefault();
+  const town = areaCities.find(item => item.code === areaTown.value);
+  if (town) choose(town);
+});
+
 filter.addEventListener("change", () => { page = 0; selection = undefined; render(); });
 for (const [button, step] of [[byId("prev"), -1], [byId("next"), 1]]) {
   button.addEventListener("click", () => {
@@ -509,19 +580,26 @@ if (map) {
 function cityFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const town = normalize(params.get("comune") || "");
+  if (!town) return undefined;
   const province = (params.get("provincia") || "").toUpperCase();
   const locality = normalize(params.get("frazione") || "");
   const match = findCities(town + (province ? " " + province : "")).find(item => item.rank < 3);
-  const candidate = match?.town
-    || cities.find(candidate => candidate.key === "bologna") || cities[0];
+  const candidate = match?.town;
   return candidate && { ...candidate, locality: candidate.localities.get(locality) || match?.locality };
 }
 function restoreCity() {
   const nextCity = cityFromUrl();
-  if (!nextCity || (city?.code === nextCity.code && city.locality === nextCity.locality)) return;
-  cityInput.value = new URLSearchParams(window.location.search).has("comune") ? nextCity.locality || nextCity.label : "";
-  cityInput.setCustomValidity("");
-  clearSuggestions();
+  if (!nextCity) {
+    city = undefined;
+    selectedPlace = undefined;
+    cityInput.value = "";
+    cityInput.setCustomValidity("");
+    clearSuggestions();
+    directory.hidden = true;
+    return;
+  }
+  if (city?.code === nextCity.code && city.locality === nextCity.locality) return;
+  selectPlace(nextCity);
   showCity(nextCity);
 }
 if (cities.length && window.farmacie?.date) {
@@ -538,7 +616,5 @@ if (cities.length && window.farmacie?.date) {
   window.addEventListener("popstate", restoreCity);
 }
 else {
-  byId("result-count").textContent = "L’anagrafe non è disponibile.";
-  byId("map-fit").disabled = true;
-  updateMapNotice();
+  byId("directory-error").hidden = false;
 }

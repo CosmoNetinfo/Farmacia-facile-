@@ -63,9 +63,11 @@ def main():
         province = row["SIGLA_AUTOMOBILISTICA"]
         region = row["DEN_REG"]
         alias = row.get("COMUNE_A", "")
-        if code in municipalities or not re.fullmatch(r"\d{6}", code) or not all((name, province, region)):
+        zone = row["COD_RIP"]
+        province_name = row["DEN_UTS"]
+        if code in municipalities or not re.fullmatch(r"\d{6}", code) or not all((name, province, region, province_name)) or zone not in range(1, 6):
             raise ValueError(f"Riga ISTAT non valida: {code} {name}")
-        municipalities[code] = [code, name, province, region, alias]
+        municipalities[code] = [code, name, province, region, alias, zone, province_name]
     if len(municipalities) < 7800:
         raise ValueError("Il foglio non contiene l'elenco nazionale completo.")
     output = Path(__file__).resolve().parent / "docs" / "comuni.js"
