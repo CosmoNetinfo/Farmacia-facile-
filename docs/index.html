@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="styles.css">
   <script defer src="leaflet/leaflet.js"></script>
   <script defer src="farmacie.js"></script>
+  <script defer src="recapiti-osm.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body id="inizio">
@@ -80,6 +81,7 @@
               <select id="filter" aria-label="Filtra farmacie">
                 <option value="all">Tutte le farmacie</option>
                 <option value="hours">Con orari pubblicati</option>
+                <option value="phone">Con numero di telefono</option>
                 <option value="24h">Apertura 24 ore</option>
               </select>
             </label>
@@ -115,7 +117,7 @@
       <div>
         <a class="brand" href="#inizio"><span class="brand-mark" data-icon="cross"></span><span>Farmacia<span class="brand-accent">Vicino</span></span></a>
         <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0), estrazione del <time datetime="2026-11-10">10 novembre 2026</time>. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
-        <p>Gli orari provengono dai siti delle farmacie quando disponibili. Chiama per confermarli, soprattutto nei festivi.</p>
+        <p>Orari e recapiti provengono dai siti delle farmacie o da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, <a href="recapiti-osm.js" download>scarica i dati</a>). <span id="osm-date" hidden></span>Chiama per confermare gli orari, soprattutto nei festivi.</p>
       </div>
       <a class="back-top" href="#inizio">Torna su <span data-icon="arrow-up"></span></a>
     </div>

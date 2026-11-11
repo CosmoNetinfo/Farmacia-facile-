@@ -95,6 +95,7 @@ h2 { font-size: clamp(29px, 3vw, 40px); line-height: 1.14; letter-spacing: -.055
 .card-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 13px; margin: 8px 0 0 45px; }
 .card-action { display: inline-flex; align-items: center; gap: 5px; color: var(--blue-dark); border: 0; background: transparent; font-size: 12px; font-weight: 800; padding: 2px 0; }
 .card-action:hover, .footer-inner p a:hover { text-decoration: underline; }
+.card-source { color: var(--muted); font-size: 11px; text-decoration: underline; }
 .pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 14px; font-size: 13px; color: var(--muted); }
 .pagination button, #map-fit { border: 1px solid var(--border); border-radius: 8px; width: 34px; height: 34px; display: grid; place-items: center; color: var(--blue-dark); background: white; }
 .pagination button:not(:disabled):hover, #map-fit:hover { background: #eaf1ff; }
@@ -122,7 +123,7 @@ h2 { font-size: clamp(29px, 3vw, 40px); line-height: 1.14; letter-spacing: -.055
 .leaflet-popup-content { font: 13px/1.4 "DM Sans", system-ui, sans-serif; margin: 13px 24px 13px 13px; }
 .leaflet-popup-content p { margin: 3px 0 6px; color: var(--muted); }
 .leaflet-popup-content a { color: var(--blue-dark); font-weight: 800; }
-.popup-call { margin-left: 12px; }
+.popup-actions { display: flex; flex-wrap: wrap; gap: 4px 12px; }
 
 footer { border-top: 1px solid var(--border); background: white; scroll-margin-top: 18px; }
 .footer-inner { display: flex; align-items: start; justify-content: space-between; gap: 16px; padding-block: 23px 30px; }

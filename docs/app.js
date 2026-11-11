@@ -56,6 +56,19 @@ const verified = {
     site: "https://almafarmacie.it/pharmacy/dei-servi/"
   }
 };
+const osmContacts = window.recapitiOSM?.records || {};
+const osmDays = { Mo: "Lun", Tu: "Mar", We: "Mer", Th: "Gio", Fr: "Ven", Sa: "Sab", Su: "Dom", PH: "Festivi" };
+function communityDetails(id) {
+  const record = osmContacts[id];
+  if (!record) return undefined;
+  const [type, osmId, phone, site, schedule] = record;
+  const alwaysOpen = schedule === "24/7";
+  const hours = alwaysOpen ? "Tutti i giorni, 24 ore su 24" : schedule?.split(";").map(rule =>
+    rule.trim().replace(/\b(?:Mo|Tu|We|Th|Fr|Sa|Su|PH)\b/g, day => osmDays[day]).replace(/\boff\b/g, "chiuso")
+      .replaceAll("-", "–").replace(/,(\S)/g, ", $1")
+  ).join(" · ");
+  return { phone, site, hours, alwaysOpen, source: "https://www.openstreetmap.org/" + type + "/" + osmId };
+}
 const collator = new Intl.Collator("it", { sensitivity: "base" });
 const number = new Intl.NumberFormat("it-IT");
 const normalize = text => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
@@ -148,6 +161,7 @@ function card(pharmacy) {
   }
   if (pharmacy.info?.site) actions.append(withIcon(external("", pharmacy.info.site, "card-action"), "globe", "Sito web"));
   actions.append(withIcon(external("", directions(pharmacy), "card-action"), "directions", "Indicazioni"));
+  if (pharmacy.info?.source) actions.append(external("Fonte OSM", pharmacy.info.source, "card-source"));
   row.append(actions);
   return row;
 }
@@ -155,6 +169,7 @@ function card(pharmacy) {
 function getMatches() {
   if (filter.value === "24h") return pharmacies.filter(pharmacy => pharmacy.info?.alwaysOpen);
   if (filter.value === "hours") return pharmacies.filter(pharmacy => pharmacy.info?.hours);
+  if (filter.value === "phone") return pharmacies.filter(pharmacy => pharmacy.info?.phone);
   return pharmacies;
 }
 function pageRows(matches) {
@@ -188,14 +203,19 @@ function popupContent(pharmacy) {
   const content = element("div");
   content.append(
     element("strong", "", pharmacy.name),
-    element("p", "", addressLine(pharmacy)),
-    external("Indicazioni ↗", directions(pharmacy))
+    element("p", "", addressLine(pharmacy))
   );
+  if (pharmacy.info?.hours) content.append(element("p", "", pharmacy.info.hours));
+  const actions = element("div", "popup-actions");
+  actions.append(external("Indicazioni ↗", directions(pharmacy)));
   if (pharmacy.info?.phone) {
-    const call = element("a", "popup-call", "Chiama");
+    const call = element("a", "", "Chiama");
     call.href = "tel:" + pharmacy.info.phone;
-    content.append(call);
+    actions.append(call);
   }
+  if (pharmacy.info?.site) actions.append(external("Sito web ↗", pharmacy.info.site));
+  if (pharmacy.info?.source) actions.append(external("Fonte OSM", pharmacy.info.source));
+  content.append(actions);
   return content;
 }
 function updateMap(matches) {
@@ -248,7 +268,7 @@ function showCity(nextCity, scroll = false) {
   filter.value = "all";
   const sortDistance = ([lat, lon]) => (lat - 44.494) ** 2 + ((lon - 11.344) * 0.71) ** 2;
   pharmacies = city.pharmacies.map(([id, name, address, postcode, coords, type, village]) => {
-    const info = verified[id];
+    const info = verified[id] || communityDetails(id);
     const standardName = name === name.toLocaleUpperCase("it-IT") ? titleCase(name) : name;
     const fullName = /\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(standardName)
       ? standardName : (type.toLowerCase().includes("dispensario") ? "Dispensario " : "Farmacia ") + standardName;
@@ -301,6 +321,11 @@ function choose(candidate) {
   cityInput.value = candidate.label + (duplicate ? " (" + candidate.province + ")" : "");
   cityInput.setCustomValidity("");
   clearSuggestions();
+  const url = new URL(window.location.href);
+  url.searchParams.set("comune", candidate.label);
+  url.searchParams.set("provincia", candidate.province);
+  url.hash = "risultati";
+  if (url.href !== window.location.href) window.history.pushState(null, "", url);
   showCity(candidate, true);
 }
 function showSuggestions() {
@@ -406,12 +431,33 @@ if (map) {
   });
   observer.observe(byId("map"));
 }
+function cityFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const town = normalize(params.get("comune") || "");
+  const province = (params.get("provincia") || "").toUpperCase();
+  return cities.find(candidate => candidate.key === town && (!province || candidate.province === province))
+    || cities.find(candidate => candidate.key === "bologna") || cities[0];
+}
+function restoreCity() {
+  const nextCity = cityFromUrl();
+  if (!nextCity || city === nextCity) return;
+  cityInput.value = new URLSearchParams(window.location.search).has("comune") ? nextCity.label : "";
+  cityInput.setCustomValidity("");
+  clearSuggestions();
+  showCity(nextCity);
+}
 if (cities.length) {
   const snapshot = document.querySelector("#fonti time");
-  const date = new Date(window.farmacie.date + "T00:00:00Z");
+  const dateFormat = new Intl.DateTimeFormat("it-IT", { dateStyle: "long", timeZone: "UTC" });
   snapshot.dateTime = window.farmacie.date;
-  snapshot.textContent = new Intl.DateTimeFormat("it-IT", { dateStyle: "long", timeZone: "UTC" }).format(date);
-  showCity(cities.find(candidate => candidate.key === "bologna") || cities[0]);
+  snapshot.textContent = dateFormat.format(new Date(snapshot.dateTime + "T00:00:00Z"));
+  if (window.recapitiOSM?.date) {
+    const date = new Date(window.recapitiOSM.date + "T00:00:00Z");
+    byId("osm-date").textContent = "Estrazione OpenStreetMap del " + dateFormat.format(date) + ". ";
+    byId("osm-date").hidden = false;
+  }
+  restoreCity();
+  window.addEventListener("popstate", restoreCity);
 }
 else {
   byId("result-count").textContent = "L’anagrafe non è disponibile.";
