@@ -173,6 +173,7 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
 .sources-dialog p + p { margin-top: 6px; }
 .sources-dialog a { color: var(--green-dark); font-weight: 800; }
 .sources-dialog .report-pharmacy { margin-bottom: 12px; color: var(--ink); font-weight: 700; }
+.report-contact-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 
 @media (min-width: 861px) {
   .directory.map-view .result-grid { grid-template-columns: minmax(0, 1fr); }
