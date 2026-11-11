@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cerca le farmacie italiane per comune, consulta gli indirizzi e trovale sulla mappa.">
+  <meta name="theme-color" content="#f7f9fc">
+  <title>Farmacia Vicino — Trova una farmacia in Italia</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="leaflet/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="leaflet/leaflet.js"></script>
+  <script defer src="farmacie.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body id="inizio">
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#inizio" aria-label="Farmacia Vicino, inizio pagina">
+        <span class="brand-mark" data-icon="cross"></span><span>Farmacia<span class="brand-accent">Vicino</span></span>
+      </a>
+      <nav aria-label="Navigazione principale">
+        <a class="nav-active" href="#risultati">Esplora farmacie</a>
+        <a href="#fonti">Fonti dei dati <span data-icon="arrow-down-right"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="titolo">
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div>
+        <div class="art-pin"><span data-icon="pin"></span></div>
+        <div class="art-cross" data-icon="plus"></div>
+      </div>
+      <div class="wrap hero-inner">
+        <p class="eyebrow"><span data-icon="pin"></span> Il cerca-farmacie italiano</p>
+        <h1 id="titolo">Trova la tua farmacia<span>.</span></h1>
+        <p class="hero-copy">Cerca per comune e consulta indirizzi, orari e recapiti disponibili.</p>
+        <form id="search" class="search" role="search">
+          <div class="search-field">
+            <label for="city" class="sr-only">Comune</label>
+            <span class="search-icon" data-icon="search"></span>
+            <input id="city" type="search" placeholder="Cerca un comune" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false" required>
+            <ul id="suggestions" role="listbox" hidden></ul>
+          </div>
+          <button type="submit" class="primary">Cerca <span data-icon="arrow-right"></span></button>
+        </form>
+        <div class="quick-search">
+          <span>Città popolari</span>
+          <button type="button" data-city="Bologna">Bologna</button>
+          <button type="button" data-city="Milano">Milano</button>
+          <button type="button" data-city="Roma">Roma</button>
+          <button type="button" data-city="Napoli">Napoli</button>
+          <button type="button" data-city="Torino">Torino</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="risultati" class="wrap directory" aria-labelledby="result-title" tabindex="-1">
+      <div class="section-heading">
+        <div>
+          <p id="location-label" class="eyebrow"><span data-icon="pin"></span> Emilia-Romagna</p>
+          <h2 id="result-title">Farmacie a Bologna</h2>
+          <p id="result-count" role="status">Caricamento delle farmacie…</p>
+        </div>
+        <div class="view-toggle" aria-label="Vista dei risultati">
+          <button id="list-view" aria-pressed="true"><span data-icon="list"></span> Elenco</button>
+          <button id="map-view" aria-pressed="false"><span data-icon="map"></span> Mappa</button>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="list-pane">
+          <div class="results-toolbar">
+            <label class="filter-label"><span data-icon="filter"></span>
+              <select id="filter" aria-label="Filtra farmacie">
+                <option value="all">Tutte le farmacie</option>
+                <option value="hours">Con orari pubblicati</option>
+                <option value="24h">Apertura 24 ore</option>
+              </select>
+            </label>
+          </div>
+          <ol id="pharmacies" class="pharmacy-list" aria-label="Farmacie trovate"></ol>
+          <p id="empty-list" class="empty" hidden></p>
+          <nav id="pagination" class="pagination" aria-label="Pagine dei risultati" hidden>
+            <button id="prev" type="button" aria-label="Pagina precedente"><span data-icon="arrow-left"></span></button>
+            <span id="page-label"></span>
+            <button id="next" type="button" aria-label="Pagina successiva"><span data-icon="arrow-right"></span></button>
+          </nav>
+        </div>
+
+        <div class="map-pane">
+          <div class="map-frame">
+            <div class="map-top">
+              <div><span data-icon="map"></span> Mappa delle farmacie</div>
+              <button id="map-fit" type="button" aria-label="Mostra tutti i segnaposti sulla mappa" title="Centra sui segnaposti"><span data-icon="target"></span></button>
+            </div>
+            <div class="map-body">
+              <div id="map" aria-label="Mappa interattiva delle farmacie"></div>
+              <p id="map-empty" class="map-notice" hidden></p>
+            </div>
+            <div class="map-bottom"><span class="legend-dot"></span> <span id="map-count">Farmacie sulla mappa</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="fonti">
+    <div class="wrap footer-inner">
+      <div>
+        <a class="brand" href="#inizio"><span class="brand-mark" data-icon="cross"></span><span>Farmacia<span class="brand-accent">Vicino</span></span></a>
+        <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0), estrazione del <time datetime="2026-11-10">10 novembre 2026</time>. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
+        <p>Gli orari provengono dai siti delle farmacie quando disponibili. Chiama per confermarli, soprattutto nei festivi.</p>
+      </div>
+      <a class="back-top" href="#inizio">Torna su <span data-icon="arrow-up"></span></a>
+    </div>
+  </footer>
+  <noscript>Attiva JavaScript per cercare le farmacie e visualizzare la mappa.</noscript>
+</body>
+</html>
