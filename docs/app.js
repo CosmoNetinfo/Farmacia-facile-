@@ -14,7 +14,6 @@ const paths = {
   "arrow-right": '<path d="M4 12h15m-6-6 6 6-6 6"/>',
   "arrow-left": '<path d="M20 12H5m6 6-6-6 6-6"/>',
   "arrow-up": '<path d="M12 20V5m-6 6 6-6 6 6"/>',
-  "arrow-down-right": '<path d="m6 6 12 12m-8 0h8v-8"/>'
 };
 
 function icon(name) {
@@ -143,6 +142,11 @@ function buildCities() {
 }
 const cities = buildCities();
 const byId = id => document.getElementById(id);
+const sourcesDialog = byId("fonti");
+document.querySelectorAll("[data-sources]").forEach(button => {
+  button.addEventListener("click", () => sourcesDialog.showModal());
+});
+if (window.location.hash === "#fonti") sourcesDialog.showModal();
 const directory = byId("risultati");
 const list = byId("pharmacies");
 const cityInput = byId("city");

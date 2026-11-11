@@ -31,7 +31,7 @@
       </a>
       <nav aria-label="Navigazione principale">
         <a class="nav-active" href="#esplora">Esplora farmacie</a>
-        <a href="#fonti">Fonti dei dati <span data-icon="arrow-down-right"></span></a>
+        <button type="button" class="sources-trigger" data-sources aria-haspopup="dialog" aria-controls="fonti">Fonti dei dati <span data-icon="arrow-right"></span></button>
       </nav>
     </div>
   </header>
@@ -130,17 +130,36 @@
     </section>
   </main>
 
-  <footer id="fonti">
+  <footer>
     <div class="wrap footer-inner">
-      <div>
-        <a class="brand" href="#inizio"><img class="brand-mark" src="favicon.svg" alt="" width="26" height="26"><span>Farmacia<span class="brand-accent">Vicino</span></span></a>
-        <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0)<span id="ministry-snapshot" hidden>, estrazione del <time></time></span>. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
-        <p>Elenco dei comuni, denominazioni e fusioni da <a href="https://situas.istat.it/web/" target="_blank" rel="noopener">ISTAT – SITUAS</a>. Le frazioni ricercabili sono quelle riportate nell’anagrafe delle farmacie.</p>
-        <p>Per orari e recapiti diamo priorità ai siti delle farmacie. Dove disponibili, integriamo i dati di <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, <a href="recapiti-osm.js" download>scarica i dati</a>). <span id="osm-date" hidden></span>Chiama per confermare gli orari, soprattutto nei festivi.</p>
+      <a class="brand" href="#inizio"><img class="brand-mark" src="favicon.svg" alt="" width="26" height="26"><span>Farmacia<span class="brand-accent">Vicino</span></span></a>
+      <div class="footer-links">
+        <button type="button" class="sources-trigger" data-sources aria-haspopup="dialog" aria-controls="fonti">Fonti dei dati</button>
+        <a class="back-top" href="#inizio">Torna su <span data-icon="arrow-up"></span></a>
       </div>
-      <a class="back-top" href="#inizio">Torna su <span data-icon="arrow-up"></span></a>
     </div>
   </footer>
+
+  <dialog id="fonti" class="sources-dialog" aria-labelledby="sources-title">
+    <div class="sources-heading">
+      <h2 id="sources-title">Fonti dei dati</h2>
+      <form method="dialog">
+        <button class="sources-close" autofocus>Chiudi</button>
+      </form>
+    </div>
+    <section>
+      <h3>Anagrafe delle farmacie</h3>
+      <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0)<span id="ministry-snapshot" hidden>, estrazione del <time></time></span>. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
+    </section>
+    <section>
+      <h3>Comuni e frazioni</h3>
+      <p>Elenco dei comuni, denominazioni e fusioni da <a href="https://situas.istat.it/web/" target="_blank" rel="noopener">ISTAT – SITUAS</a>. Le frazioni ricercabili sono quelle riportate nell’anagrafe delle farmacie.</p>
+    </section>
+    <section>
+      <h3>Orari e recapiti</h3>
+      <p>Per orari e recapiti diamo priorità ai siti delle farmacie. Dove disponibili, integriamo i dati di <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, <a href="recapiti-osm.js" download>scarica i dati</a>). <span id="osm-date" hidden></span>Chiama per confermare gli orari, soprattutto nei festivi.</p>
+    </section>
+  </dialog>
   <noscript>Attiva JavaScript per cercare le farmacie e visualizzare la mappa.</noscript>
 </body>
 </html>
