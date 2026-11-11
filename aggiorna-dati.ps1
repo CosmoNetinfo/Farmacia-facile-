@@ -6,6 +6,7 @@ $invariant = [Globalization.CultureInfo]::InvariantCulture
 $docs = Join-Path $PSScriptRoot 'docs'
 $temporary = [IO.Directory]::CreateTempSubdirectory('farmacia-vicino-').FullName
 $python = if ($IsWindows) { 'py' } else { 'python3' }
+$curl = if ($IsWindows) { 'curl.exe' } else { 'curl' }
 
 function Read-Data([string]$Path, [string]$Variable) {
     $contents = Get-Content -Raw -LiteralPath $Path -Encoding utf8
@@ -26,14 +27,16 @@ function Get-RegistryKeys($Registry) {
 }
 
 function Save-Source([string]$Url, [string]$Path) {
-    Invoke-WebRequest -Uri $Url -OutFile $Path -TimeoutSec 45 -MaximumRetryCount 2 -RetryIntervalSec 3
+    & $curl --fail --silent --show-error --location --retry 2 --max-time 45 --proto '=https' --proto-redir '=https' --output $Path $Url
+    if ($LASTEXITCODE -ne 0) { throw "Download non riuscito: $Url" }
 }
 
 try {
     $current = Read-Data (Join-Path $docs 'farmacie.js') 'farmacie'
     $ministryHost = 'https://www.dati.salute.gov.it'
-    $catalog = Invoke-WebRequest -Uri "$ministryHost/it/dataset/farmacie/" -TimeoutSec 45 -MaximumRetryCount 2 -RetryIntervalSec 3
-    $files = [regex]::Matches($catalog.Content, 'FRM_FARMA_5_(?<day>\d{8})\.csv')
+    $catalog = Join-Path $temporary 'catalogo.html'
+    Save-Source "$ministryHost/it/dataset/farmacie/" $catalog
+    $files = [regex]::Matches((Get-Content -Raw -LiteralPath $catalog), 'FRM_FARMA_5_(?<day>\d{8})\.csv')
     $latest = $files | Sort-Object Value -Descending | Select-Object -First 1
     if (!$latest) { throw 'Il catalogo ministeriale non contiene un collegamento CSV riconosciuto.' }
     $snapshot = [datetime]::ParseExact($latest.Groups['day'].Value, 'yyyyMMdd', $invariant)
