@@ -44,23 +44,28 @@ document.querySelectorAll("[data-icon]").forEach(node => { node.innerHTML = icon
 const verified = {
   16606: {
     name: "BENU Farmacia Centrale 24H", phone: "+39051239690", hours: "Tutti i giorni, 24 ore su 24", alwaysOpen: true,
+    registryAddress: "Piazza Maggiore, 6",
     site: "https://www.benufarma.it/farmacie/bologna/store-locator-6774-benu-farmacia-centrale-24h"
   },
   6995: {
     name: "Farmacia del Pavaglione", phone: "+39051221640", hours: "Lun–sab 08:30–19:30",
+    registryAddress: "Via dell'Archiginnasio, 2/a",
     site: "https://farmaciadelpavaglione.it/contatti-orari-farmacia-bologna/"
   },
   6992: {
     name: "Antica Farmacia dei Servi", address: "Strada Maggiore, 39", phone: "+39051231638",
+    registryAddress: "Via Strada Maggiore, 39",
     hours: "Lun–ven 08:30–20:00 · Sab–dom 09:00–19:00",
     site: "https://almafarmacie.it/pharmacy/dei-servi/"
   },
   16238: {
     name: "Farmacia De Sotgiu", phone: "+39070403080", hours: "Lun–sab 08:30–20:30",
+    registryAddress: "Via Pasquale Paoli, 59",
     site: "https://www.farmaciadesotgiu.com/"
   },
   16245: {
     name: "Farmacia Dedola", phone: "+39070305829",
+    registryAddress: "Via Curie, 31/33",
     hours: "Lun–ven 08:30–14:00 e 16:00–20:00 (ott–mar) / 16:30–20:30 (apr–set) · Sab 08:30–14:00",
     site: "https://www.farmaciadedola.it/"
   }
@@ -340,7 +345,8 @@ function showCity(nextCity, scroll = false) {
   const sortDistance = ([lat, lon]) => (lat - 44.494) ** 2 + ((lon - 11.344) * 0.71) ** 2;
   const rows = city.locality ? city.pharmacies.filter(row => row[7].some(label => normalize(label) === normalize(city.locality))) : city.pharmacies;
   pharmacies = rows.map(([id, name, address, postcode, coords, type, village, localities]) => {
-    const info = verified[id] || communityDetails(id);
+    const official = verified[id];
+    const info = official && normalize(official.registryAddress) === normalize(address) ? official : communityDetails(id);
     const standardName = name === name.toLocaleUpperCase("it-IT") ? titleCase(name) : name;
     const fullName = /\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(standardName)
       ? standardName : (type.toLowerCase().includes("dispensario") ? "Dispensario " : "Farmacia ") + standardName;
@@ -607,6 +613,7 @@ if (cities.length && window.farmacie?.date) {
   const dateFormat = new Intl.DateTimeFormat("it-IT", { dateStyle: "long", timeZone: "UTC" });
   snapshot.dateTime = window.farmacie.date;
   snapshot.textContent = dateFormat.format(new Date(snapshot.dateTime + "T00:00:00Z"));
+  byId("ministry-snapshot").hidden = false;
   if (window.recapitiOSM?.date) {
     const date = new Date(window.recapitiOSM.date + "T00:00:00Z");
     byId("osm-date").textContent = "Estrazione OpenStreetMap del " + dateFormat.format(date) + ". ";

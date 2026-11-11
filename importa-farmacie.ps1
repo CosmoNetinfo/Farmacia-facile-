@@ -1,6 +1,7 @@
 param(
     [string]$Csv = (Join-Path $PSScriptRoot 'farmacie-originale.csv'),
-    [datetime]$Data = [datetime]'2026-11-10'
+    [datetime]$Data = [datetime]'2026-11-10',
+    [string]$Output = (Join-Path $PSScriptRoot 'docs/farmacie.js')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -53,5 +54,5 @@ foreach ($entry in ($active.Values | Sort-Object { [int]$_.Row.cod_farmacia })) 
 }
 
 $json = [ordered]@{ date = $snapshot; cities = @($cities.Values) } | ConvertTo-Json -Depth 9 -Compress
-[IO.File]::WriteAllText((Join-Path $PSScriptRoot 'docs/farmacie.js'), "window.farmacie = $json;", $utf8)
+[IO.File]::WriteAllText($Output, "window.farmacie = $json;", $utf8)
 Write-Output "$($active.Count) farmacie in $($cities.Count) comuni."

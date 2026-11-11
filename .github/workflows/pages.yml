@@ -1,0 +1,105 @@
+name: Aggiorna dati e pubblica il sito
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+  schedule:
+    - cron: '17 9 1 * *'
+  workflow_dispatch:
+    inputs:
+      forza_pubblicazione:
+        description: Ripubblica anche senza modifiche ai dati
+        type: boolean
+        default: false
+
+concurrency:
+  group: farmacia-vicino-pages
+  cancel-in-progress: false
+
+jobs:
+  prepara:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+      pages: read
+    outputs:
+      pubblica: ${{ steps.controllo.outputs.pubblica }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Leggi configurazione di GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Controlla Ministero e ISTAT
+        if: github.event_name != 'push'
+        shell: pwsh
+        run: ./aggiorna-dati.ps1
+
+      - name: Decidi se pubblicare
+        id: controllo
+        env:
+          EVENTO: ${{ github.event_name }}
+          FORZA: ${{ inputs.forza_pubblicazione }}
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets=(farmacie.js comuni.js recapiti-osm.js)
+          for asset in app.js "${assets[@]}"; do
+            node --check "docs/$asset"
+          done
+
+          pubblica=false
+          if [[ "$EVENTO" == push || "$FORZA" == true ]]; then
+            pubblica=true
+          fi
+          if ! git diff --quiet -- docs/farmacie.js docs/comuni.js docs/recapiti-osm.js; then
+            git add -- docs/farmacie.js docs/comuni.js docs/recapiti-osm.js
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'Aggiorna i dati da Ministero della Salute e ISTAT'
+            git push origin HEAD:main
+            pubblica=true
+          fi
+
+          # Riprende anche una pubblicazione precedente interrotta dopo il commit.
+          if [[ "$pubblica" == false ]]; then
+            for asset in "${assets[@]}"; do
+              if ! curl --fail --silent --show-error --location --retry 2 --max-time 25 \
+                "${SITE_URL%/}/$asset" | cmp -s "docs/$asset" -; then
+                pubblica=true
+                break
+              fi
+            done
+          fi
+          echo "pubblica=$pubblica" >> "$GITHUB_OUTPUT"
+
+      - name: Prepara i file del sito
+        if: steps.controllo.outputs.pubblica == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+
+  pubblica:
+    if: needs.prepara.outputs.pubblica == 'true'
+    needs: prepara
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Pubblica su GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

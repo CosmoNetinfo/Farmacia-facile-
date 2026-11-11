@@ -54,6 +54,7 @@ def main():
     parser.add_argument("catalogo", type=Path, help="SITUAS 61, codici e denominazioni")
     parser.add_argument("soppressioni", type=Path, help="SITUAS 128, comuni soppressi")
     parser.add_argument("sardegna", type=Path, help="ZIP ISTAT di ricodifica dei comuni sardi")
+    parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parent / "docs" / "comuni.js")
     args = parser.parse_args()
 
     municipalities = {}
@@ -70,14 +71,13 @@ def main():
         municipalities[code] = [code, name, province, region, alias, zone, province_name]
     if len(municipalities) < 7800:
         raise ValueError("Il foglio non contiene l'elenco nazionale completo.")
-    output = Path(__file__).resolve().parent / "docs" / "comuni.js"
     redirects = successors(rows(args.soppressioni), municipalities, sardinian_codes(args.sardegna, municipalities))
     payload = json.dumps(
         {"cities": list(municipalities.values()), "redirects": redirects},
         ensure_ascii=False,
         separators=(",", ":"),
     )
-    output.write_text(f"/* Fonte: ISTAT — {SOURCE} */\nwindow.comuniIstat = {payload};\n", encoding="utf-8")
+    args.output.write_text(f"/* Fonte: ISTAT — {SOURCE} */\nwindow.comuniIstat = {payload};\n", encoding="utf-8")
     print(f"{len(municipalities)} comuni ISTAT, {len(redirects)} codici storici ricondotti a un comune attuale.")
 
 

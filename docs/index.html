@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Cerca le farmacie italiane per comune, consulta gli indirizzi e trovale sulla mappa.">
   <meta name="theme-color" content="#f6faf7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Farmacia Vicino">
   <title>Farmacia Vicino — Trova una farmacia in Italia</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -129,7 +134,7 @@
     <div class="wrap footer-inner">
       <div>
         <a class="brand" href="#inizio"><img class="brand-mark" src="favicon.svg" alt="" width="26" height="26"><span>Farmacia<span class="brand-accent">Vicino</span></span></a>
-        <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0), estrazione dell’<time datetime="2026-11-11">11 novembre 2026</time>. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
+        <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0)<span id="ministry-snapshot" hidden>, estrazione del <time></time></span>. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
         <p>Elenco dei comuni, denominazioni e fusioni da <a href="https://situas.istat.it/web/" target="_blank" rel="noopener">ISTAT – SITUAS</a>. Le frazioni ricercabili sono quelle riportate nell’anagrafe delle farmacie.</p>
         <p>Per orari e recapiti diamo priorità ai siti delle farmacie. Dove disponibili, integriamo i dati di <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, <a href="recapiti-osm.js" download>scarica i dati</a>). <span id="osm-date" hidden></span>Chiama per confermare gli orari, soprattutto nei festivi.</p>
       </div>
