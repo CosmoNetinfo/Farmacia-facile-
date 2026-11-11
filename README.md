@@ -1,6 +1,6 @@
 # Farmacia Vicino
 
-> **Versione beta — fase embrionale.** Il progetto è appena nato e cambia ogni giorno. Funziona, ma i dati sono incompleti e alcune funzioni sono ancora da costruire. Non usarlo come unica fonte per decisioni urgenti: in caso di emergenza chiama il 112.
+> **Versione 1.0 beta.** L’interfaccia è stabile e i dati sono in ampliamento. Chiama la farmacia per confermare gli orari. In caso di emergenza, chiama il 112.
 
 **Farmacia Vicino** è una web app gratuita per trovare le farmacie italiane. Si cerca per comune o frazione, si consultano indirizzi, orari e recapiti disponibili e si vedono le farmacie sulla mappa.
 
@@ -22,7 +22,7 @@ Sviluppata da [CosmoNet.info](https://www.cosmonet.info/).
 - **Nessun backend e nessun account**: è un sito statico, la ricerca avviene nel browser.
 - **Pannello "Fonti dei dati"** con tutte le fonti, le licenze e le date di estrazione.
 - **Segnala o correggi** da ogni scheda. Puoi aprire l’editor OpenStreetMap quando è disponibile un punto, aprire un modulo GitHub precompilato o contattare CosmoNet via WhatsApp o Telegram.
-- Ha manifest e icone per essere aggiunta alla schermata Home. Una modalità offline non c'è ancora.
+- Ha manifest e icone per essere aggiunta alla schermata Home.
 
 ## Dati al momento (misurati l'11 novembre 2026)
 
@@ -37,14 +37,15 @@ Sviluppata da [CosmoNet.info](https://www.cosmonet.info/).
 
 L'anagrafe ha data 11 novembre 2026, l'estrazione OpenStreetMap 10 novembre 2026. I numeri cambiano a ogni aggiornamento.
 
-## Limiti attuali (beta)
+## Limiti attuali
 
-- La ricerca per posizione include solo le farmacie con coordinate. Gli orari del giorno di FVG e Bolzano si consultano nella ricerca per comune.
-- Gli orari del giorno coprono solo FVG e Bolzano. Per il resto d'Italia mancano o arrivano solo da OpenStreetMap, dove sono volontari a inserirli.
+- La ricerca per posizione include solo le farmacie con coordinate.
+- I recapiti sono disponibili per una piccola parte delle farmacie. Nel campione dell’11 novembre 2026, il 9,4% ha un numero di telefono e il 3,9% ha un sito web.
+- Gli orari del giorno sono disponibili solo in Friuli-Venezia Giulia e nella Provincia autonoma di Bolzano, nella ricerca per comune.
 - La ricerca per comune mostra i turni solo per Firenze e solo per le farmacie abbinate univocamente per via e civico, con riscontro sul nome. Civici rossi, multipli o assenti restano esclusi.
+- La web app richiede una connessione a Internet. La modalità offline non è disponibile.
 - Telefoni, siti e orari da OpenStreetMap sono abbinati alle farmacie in modo prudente: se l'abbinamento è dubbio, il dato non viene mostrato.
 - Alcuni segnaposto sulla mappa possono essere approssimativi.
-- Le farmacie di turno non sono gestite in modo uniforme a livello nazionale.
 - I nomi arrivano dall'anagrafe e non sono ripuliti: possono contenere la forma societaria.
 - Solo a Bologna le schede sono ordinate per vicinanza al centro. Altrove l'ordine è alfabetico.
 - **Chiama sempre la farmacia per confermare gli orari**, soprattutto nei festivi.
@@ -122,7 +123,7 @@ La posizione si chiede solo quando premi «Usa la mia posizione». L’app calco
 
 ## Contribuire
 
-Il progetto è in una fase molto iniziale e ogni aiuto è benvenuto: segnalazioni di dati sbagliati, idee, test su dispositivi diversi. Apri una issue indicando comune, provincia e cosa ti aspettavi di vedere.
+Puoi contribuire segnalando dati errati, proponendo idee o provando l’app su dispositivi diversi. Apri una issue indicando comune, provincia e cosa ti aspettavi di vedere.
 
 Puoi correggere telefono, sito e orari (`opening_hours`) su OpenStreetMap dal dialogo «Segnala o correggi». Le modifiche arrivano al prossimo aggiornamento dell’estrazione OpenStreetMap. Per segnalare un errore a CosmoNet, anche per una farmacia priva di coordinate e di un oggetto OpenStreetMap abbinato, puoi usare GitHub, WhatsApp o Telegram.
 
