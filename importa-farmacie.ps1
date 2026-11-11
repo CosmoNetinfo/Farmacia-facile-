@@ -36,7 +36,7 @@ foreach ($entry in ($active.Values | Sort-Object { [int]$_.Row.cod_farmacia })) 
     $row = $entry.Row
     $code = $row.cod_comune
     if (!$cities.Contains($code)) {
-        $cities[$code] = @((Format-Field $row.comune), $row.sigla_provincia, (Format-Field $row.regione), [System.Collections.Generic.List[object]]::new())
+        $cities[$code] = @((Format-Field $row.comune), $row.sigla_provincia, (Format-Field $row.regione), [System.Collections.Generic.List[object]]::new(), $code)
     }
     $latitude = 0.0
     $longitude = 0.0

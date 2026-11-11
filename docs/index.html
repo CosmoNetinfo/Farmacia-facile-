@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Cerca le farmacie italiane per comune, consulta gli indirizzi e trovale sulla mappa.">
-  <meta name="theme-color" content="#f7f9fc">
+  <meta name="theme-color" content="#f6faf7">
   <title>Farmacia Vicino — Trova una farmacia in Italia</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="styles.css">
   <script defer src="leaflet/leaflet.js"></script>
   <script defer src="farmacie.js"></script>
+  <script defer src="comuni.js"></script>
   <script defer src="recapiti-osm.js"></script>
   <script defer src="app.js"></script>
 </head>
@@ -21,7 +22,7 @@
   <header class="topbar">
     <div class="wrap topbar-inner">
       <a class="brand" href="#inizio" aria-label="Farmacia Vicino, inizio pagina">
-        <span class="brand-mark" data-icon="cross"></span><span>Farmacia<span class="brand-accent">Vicino</span></span>
+        <img class="brand-mark" src="favicon.svg" alt="" width="36" height="36"><span>Farmacia<span class="brand-accent">Vicino</span></span>
       </a>
       <nav aria-label="Navigazione principale">
         <a class="nav-active" href="#risultati">Esplora farmacie</a>
@@ -40,12 +41,12 @@
       <div class="wrap hero-inner">
         <p class="eyebrow"><span data-icon="pin"></span> Il cerca-farmacie italiano</p>
         <h1 id="titolo">Trova la tua farmacia<span>.</span></h1>
-        <p class="hero-copy">Cerca per comune e consulta indirizzi, orari e recapiti disponibili.</p>
+        <p class="hero-copy">Cerca per comune o frazione e consulta indirizzi, orari e recapiti disponibili.</p>
         <form id="search" class="search" role="search">
           <div class="search-field">
-            <label for="city" class="sr-only">Comune</label>
+            <label for="city" class="sr-only">Comune o frazione</label>
             <span class="search-icon" data-icon="search"></span>
-            <input id="city" type="search" placeholder="Cerca un comune" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false" required>
+            <input id="city" type="search" placeholder="Comune o frazione" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false" required>
             <ul id="suggestions" role="listbox" hidden></ul>
           </div>
           <button type="submit" class="primary">Cerca <span data-icon="arrow-right"></span></button>
@@ -68,13 +69,17 @@
           <h2 id="result-title">Farmacie a Bologna</h2>
           <p id="result-count" role="status">Caricamento delle farmacie…</p>
         </div>
-        <div class="view-toggle" aria-label="Vista dei risultati">
+        <div id="view-toggle" class="view-toggle" aria-label="Vista dei risultati">
           <button id="list-view" aria-pressed="true"><span data-icon="list"></span> Elenco</button>
           <button id="map-view" aria-pressed="false"><span data-icon="map"></span> Mappa</button>
         </div>
       </div>
 
-      <div class="result-grid">
+      <div id="no-pharmacies" class="empty no-pharmacies" hidden>
+        <p>Nell’anagrafe del Ministero della Salute non risultano farmacie per questo comune.</p>
+        <div id="other-cities" class="quick-search"></div>
+      </div>
+      <div id="result-grid" class="result-grid">
         <div class="list-pane">
           <div class="results-toolbar">
             <label class="filter-label"><span data-icon="filter"></span>
@@ -115,8 +120,9 @@
   <footer id="fonti">
     <div class="wrap footer-inner">
       <div>
-        <a class="brand" href="#inizio"><span class="brand-mark" data-icon="cross"></span><span>Farmacia<span class="brand-accent">Vicino</span></span></a>
+        <a class="brand" href="#inizio"><img class="brand-mark" src="favicon.svg" alt="" width="26" height="26"><span>Farmacia<span class="brand-accent">Vicino</span></span></a>
         <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0), estrazione del <time datetime="2026-11-10">10 novembre 2026</time>. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
+        <p>Elenco dei comuni, denominazioni e fusioni da <a href="https://situas.istat.it/web/" target="_blank" rel="noopener">ISTAT – SITUAS</a>. Le frazioni ricercabili sono quelle riportate nell’anagrafe delle farmacie.</p>
         <p>Orari e recapiti provengono dai siti delle farmacie o da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL 1.0</a>, <a href="recapiti-osm.js" download>scarica i dati</a>). <span id="osm-date" hidden></span>Chiama per confermare gli orari, soprattutto nei festivi.</p>
       </div>
       <a class="back-top" href="#inizio">Torna su <span data-icon="arrow-up"></span></a>

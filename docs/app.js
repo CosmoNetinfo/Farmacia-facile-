@@ -82,11 +82,52 @@ function placeName(text) {
   return text ? titleCase(text.replace(/EMILIA ROMAGNA/gi, "Emilia-Romagna")) : "";
 }
 
-const data = window.farmacie?.cities || [];
-const cities = data.map(([name, province, region, pharmacies]) => {
-  const label = placeName(name);
-  return { label, key: normalize(label), province, region: placeName(region), pharmacies };
-}).sort((a, b) => collator.compare(a.label, b.label) || collator.compare(a.province, b.province));
+const loosePlaceKey = key => key.replace(/\b(?:di|del|della|nel|nell|nella|sul|sulla)\s+/g, "");
+function villageName(raw) {
+  const name = placeName((raw || "").replace(/^fraz(?:ione)?[.\s]+/i, "").trim());
+  return ["", "capoluogo", "centro"].includes(normalize(name)) ? "" : name;
+}
+function buildCities() {
+  const catalog = window.comuniIstat;
+  const data = window.farmacie?.cities || [];
+  const byCode = new Map();
+  function addCity(code, label, province, region, alias = "") {
+    const key = normalize(label);
+    const town = {
+      code, label, key, province, region, provinces: new Set([province]),
+      aliases: new Set([normalize(alias), loosePlaceKey(key)].filter(value => value && value !== key)),
+      localities: new Map(), pharmacies: []
+    };
+    byCode.set(code, town);
+    return town;
+  }
+  const byName = new Map();
+  for (const [code, name, province, region, alias] of catalog?.cities || []) {
+    const town = addCity(code, name, province, region, alias);
+    if (!byName.has(town.key)) byName.set(town.key, []);
+    byName.get(town.key).push(town);
+  }
+  for (const [name, province, region, rows, code] of data) {
+    const key = normalize(name);
+    const successor = catalog?.redirects?.[code];
+    const namesakes = byName.get(key) || [];
+    const sameRegion = namesakes.filter(item => normalize(item.region) === normalize(region));
+    const town = byCode.get(code) || byCode.get(successor)
+      || (sameRegion.length === 1 ? sameRegion[0] : undefined)
+      || (namesakes.length === 1 ? namesakes[0] : undefined)
+      || addCity(code || key + "-" + province, placeName(name), province, placeName(region));
+    town.provinces.add(province);
+    const former = successor && key !== town.key ? placeName(name) : "";
+    if (key !== town.key && !former) town.aliases.add(key);
+    for (const row of rows) {
+      const localities = [former, villageName(row[6])].filter(Boolean);
+      localities.forEach(label => town.localities.set(normalize(label), label));
+      town.pharmacies.push([...row, localities]);
+    }
+  }
+  return [...byCode.values()].sort((a, b) => collator.compare(a.label, b.label) || collator.compare(a.province, b.province));
+}
+const cities = buildCities();
 const byId = id => document.getElementById(id);
 const directory = byId("risultati");
 const list = byId("pharmacies");
@@ -261,19 +302,34 @@ function render() {
   updateMap(matches);
 }
 
+function renderProvinceOptions() {
+  const container = byId("other-cities");
+  const options = cities.filter(town => town.province === city.province && town.pharmacies.length)
+    .sort((a, b) => b.pharmacies.length - a.pharmacies.length).slice(0, 5);
+  container.replaceChildren();
+  if (!options.length) return;
+  container.append(element("span", "", "Altri comuni nella provincia"));
+  for (const town of options) {
+    const button = element("button", "", town.label);
+    button.type = "button";
+    button.addEventListener("click", () => choose(town));
+    container.append(button);
+  }
+}
 function showCity(nextCity, scroll = false) {
   city = nextCity;
   page = 0;
   selection = undefined;
   filter.value = "all";
   const sortDistance = ([lat, lon]) => (lat - 44.494) ** 2 + ((lon - 11.344) * 0.71) ** 2;
-  pharmacies = city.pharmacies.map(([id, name, address, postcode, coords, type, village]) => {
+  const rows = city.locality ? city.pharmacies.filter(row => row[7].some(label => normalize(label) === normalize(city.locality))) : city.pharmacies;
+  pharmacies = rows.map(([id, name, address, postcode, coords, type, village, localities]) => {
     const info = verified[id] || communityDetails(id);
     const standardName = name === name.toLocaleUpperCase("it-IT") ? titleCase(name) : name;
     const fullName = /\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(standardName)
       ? standardName : (type.toLowerCase().includes("dispensario") ? "Dispensario " : "Farmacia ") + standardName;
     const street = info?.address || (address === address.toLocaleUpperCase("it-IT") ? titleCase(address) : address);
-    return { id, name: info?.name || fullName, address: [street, village ? placeName(village) : ""].filter(value => value && value !== "-").join(", "), postcode: postcode === "-" ? "" : postcode, coords, info };
+    return { id, name: info?.name || fullName, address: [street, villageName(village) || localities[0]].filter(value => value && value !== "-").join(", "), postcode: postcode === "-" ? "" : postcode, coords, info };
   }).sort((a, b) => {
     if (city.key === "bologna") {
       const curatedOrder = [16606, 6995, 6992];
@@ -285,9 +341,15 @@ function showCity(nextCity, scroll = false) {
     }
     return collator.compare(a.name, b.name);
   });
-  withIcon(byId("location-label"), "pin", city.region);
-  byId("result-title").textContent = "Farmacie a " + city.label;
-  quickLinks.forEach(button => button.setAttribute("aria-pressed", String(normalize(button.dataset.city) === city.key)));
+  const hasPharmacies = pharmacies.length > 0;
+  byId("result-grid").hidden = !hasPharmacies;
+  byId("view-toggle").hidden = !hasPharmacies;
+  byId("no-pharmacies").hidden = hasPharmacies;
+  if (!hasPharmacies) renderProvinceOptions();
+  const location = city.locality ? city.label + " (" + city.province + ")" : city.region + " · " + city.province;
+  withIcon(byId("location-label"), "pin", location);
+  byId("result-title").textContent = "Farmacie a " + (city.locality || city.label);
+  quickLinks.forEach(button => button.setAttribute("aria-pressed", String(!city.locality && normalize(button.dataset.city) === city.key)));
   render();
   if (scroll) {
     directory.focus({ preventScroll: true });
@@ -306,24 +368,36 @@ function clearSuggestions() {
 function findCities(text) {
   const query = normalize(text);
   if (!query) return [];
-  const begins = [];
-  const contains = [];
-  for (const candidate of cities) {
-    const qualified = candidate.key + " " + candidate.province.toLowerCase();
-    if (candidate.key === query || qualified === query) begins.unshift(candidate);
-    else if (candidate.key.startsWith(query)) begins.push(candidate);
-    else if (candidate.key.includes(query)) contains.push(candidate);
+  const matches = [];
+  for (const town of cities) {
+    const suffix = query.slice(-2).toUpperCase();
+    const qualified = query.at(-3) === " " && town.provinces.has(suffix) ? query.slice(0, -3) : "";
+    const exact = key => key === query || key === qualified;
+    const aliases = [...town.aliases];
+    const locality = town.localities.get(query) || town.localities.get(qualified);
+    if (exact(town.key)) matches.push({ town, rank: 0 });
+    else if (aliases.some(exact)) matches.push({ town, rank: 1 });
+    else if (locality) matches.push({ town, locality, rank: 2 });
+    else if (town.key.startsWith(query) || aliases.some(key => key.startsWith(query))) matches.push({ town, rank: 3 });
+    else {
+      for (const [key, label] of town.localities) {
+        if (key.startsWith(query)) matches.push({ town, locality: label, rank: 4 });
+      }
+      if (town.key.includes(query) || aliases.some(key => key.includes(query))) matches.push({ town, rank: 5 });
+    }
   }
-  return [...begins, ...contains];
+  return matches.sort((a, b) => a.rank - b.rank);
 }
 function choose(candidate) {
   const duplicate = cities.some(other => other.key === candidate.key && other.province !== candidate.province);
-  cityInput.value = candidate.label + (duplicate ? " (" + candidate.province + ")" : "");
+  cityInput.value = (candidate.locality || candidate.label) + (duplicate && !candidate.locality ? " (" + candidate.province + ")" : "");
   cityInput.setCustomValidity("");
   clearSuggestions();
   const url = new URL(window.location.href);
   url.searchParams.set("comune", candidate.label);
   url.searchParams.set("provincia", candidate.province);
+  if (candidate.locality) url.searchParams.set("frazione", candidate.locality);
+  else url.searchParams.delete("frazione");
   url.hash = "risultati";
   if (url.href !== window.location.href) window.history.pushState(null, "", url);
   showCity(candidate, true);
@@ -333,14 +407,14 @@ function showSuggestions() {
   clearSuggestions();
   choices = findCities(cityInput.value).slice(0, 7);
   if (!choices.length) return;
-  choices.forEach((candidate, index) => {
-    const option = element("li", "", candidate.label);
-    option.append(element("small", "", candidate.province));
+  choices.forEach(({ town, locality }, index) => {
+    const option = element("li", "", locality || town.label);
+    option.append(element("small", "", locality ? town.label + " (" + town.province + ")" : town.province));
     option.id = "city-option-" + index;
     option.setAttribute("role", "option");
     option.setAttribute("aria-selected", "false");
     option.addEventListener("pointerdown", event => event.preventDefault());
-    option.addEventListener("click", () => choose(candidate));
+    option.addEventListener("click", () => choose({ ...town, locality }));
     suggestions.append(option);
   });
   suggestions.hidden = false;
@@ -350,14 +424,15 @@ function showSuggestions() {
 byId("search").addEventListener("submit", event => {
   event.preventDefault();
   const matches = findCities(cityInput.value);
-  const exact = matches.filter(candidate => [candidate.key, candidate.key + " " + candidate.province.toLowerCase()].includes(normalize(cityInput.value)));
-  const candidate = choices[activeChoice] || (exact.length === 1 ? exact[0] : null) || (matches.length === 1 ? matches[0] : null);
-  if (candidate) choose(candidate);
+  const first = matches[0];
+  const uniqueExact = first?.rank < 3 && first.rank !== matches[1]?.rank;
+  const candidate = choices[activeChoice] || (uniqueExact || matches.length === 1 ? first : null);
+  if (candidate) choose({ ...candidate.town, locality: candidate.locality });
   else if (matches.length) {
     cityInput.focus();
     showSuggestions();
   } else {
-    cityInput.setCustomValidity("Comune non trovato. Controlla il nome e riprova.");
+    cityInput.setCustomValidity("Località non trovata. Prova con il nome del comune.");
     cityInput.reportValidity();
   }
 });
@@ -435,18 +510,21 @@ function cityFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const town = normalize(params.get("comune") || "");
   const province = (params.get("provincia") || "").toUpperCase();
-  return cities.find(candidate => candidate.key === town && (!province || candidate.province === province))
+  const locality = normalize(params.get("frazione") || "");
+  const match = findCities(town + (province ? " " + province : "")).find(item => item.rank < 3);
+  const candidate = match?.town
     || cities.find(candidate => candidate.key === "bologna") || cities[0];
+  return candidate && { ...candidate, locality: candidate.localities.get(locality) || match?.locality };
 }
 function restoreCity() {
   const nextCity = cityFromUrl();
-  if (!nextCity || city === nextCity) return;
-  cityInput.value = new URLSearchParams(window.location.search).has("comune") ? nextCity.label : "";
+  if (!nextCity || (city?.code === nextCity.code && city.locality === nextCity.locality)) return;
+  cityInput.value = new URLSearchParams(window.location.search).has("comune") ? nextCity.locality || nextCity.label : "";
   cityInput.setCustomValidity("");
   clearSuggestions();
   showCity(nextCity);
 }
-if (cities.length) {
+if (cities.length && window.farmacie?.date) {
   const snapshot = document.querySelector("#fonti time");
   const dateFormat = new Intl.DateTimeFormat("it-IT", { dateStyle: "long", timeZone: "UTC" });
   snapshot.dateTime = window.farmacie.date;
