@@ -916,9 +916,88 @@ if (cities.length && window.farmacie?.date) {
     byId("osm-date").textContent = "Estrazione OpenStreetMap del " + dateFormat.format(date) + ". ";
     byId("osm-date").hidden = false;
   }
+  initHomeDetails();
   restoreCity();
   window.addEventListener("popstate", restoreCity);
 }
 else {
   byId("directory-error").hidden = false;
+}
+
+function initHomeDetails() {
+  const dateFormat = new Intl.DateTimeFormat("it-IT", { dateStyle: "long", timeZone: "UTC" });
+  const percent = new Intl.NumberFormat("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const isTrentino = value => normalize(value).startsWith("trentino");
+
+  function openArea(region, province) {
+    const target = cities.find(town => normalize(town.region) === normalize(region) && (!province || town.province === province));
+    if (!target) return;
+    const group = Object.keys(divisions).find(name => divisions[name].includes(target.division));
+    const button = areaButtons.find(item => item.dataset.area === group);
+    if (!button) return;
+    if (button.getAttribute("aria-pressed") !== "true") button.click();
+    areaRegion.value = target.region;
+    updateAreaProvinces();
+    if (province) {
+      areaProvince.value = province;
+      updateAreaTowns();
+    }
+    areaForm.hidden = false;
+    byId("esplora").scrollIntoView({ block: "start" });
+    (areaTown.disabled ? areaProvince : areaTown).focus({ preventScroll: true });
+  }
+
+  const groups = new Map();
+  let total = 0, withCoordinates = 0, withPhone = 0, withHours = 0;
+  for (const town of cities) {
+    if (!town.pharmacies.length) continue;
+    const province = isTrentino(town.region) ? town.province : "";
+    const key = town.region + "|" + province;
+    if (!groups.has(key)) groups.set(key, { region: town.region, province, count: 0 });
+    groups.get(key).count += town.pharmacies.length;
+    for (const row of town.pharmacies) {
+      total++;
+      if (row[4]?.length) withCoordinates++;
+      const record = osmContacts[row[0]];
+      if (record?.[2]) withPhone++;
+      if (record?.[4]) withHours++;
+    }
+  }
+  if (!total) return;
+
+  const regionLabel = ({ region, province }) => !province ? region.split("/")[0]
+    : province === "BZ" ? "Bolzano" : province === "TN" ? "Trento" : region.split("/")[0];
+  const items = [...groups.values()].sort((a, b) => collator.compare(regionLabel(a), regionLabel(b)));
+  const regionList = byId("region-list");
+  for (const group of items) {
+    const item = element("li");
+    const button = element("button", "region-card");
+    button.type = "button";
+    button.append(element("strong", "", regionLabel(group)), document.createTextNode(" "), element("span", "", number.format(group.count) + " farmacie"));
+    button.addEventListener("click", () => openArea(group.region, group.province));
+    item.append(button);
+    regionList.append(item);
+  }
+  byId("regioni").hidden = false;
+
+  for (const button of document.querySelectorAll("[data-territory]")) {
+    button.addEventListener("click", () => openArea(button.dataset.territory, button.dataset.province));
+  }
+
+  const share = value => number.format(value) + " (" + percent.format(value / total * 100) + "%)";
+  byId("count-total").textContent = number.format(total);
+  byId("count-coordinates").textContent = share(withCoordinates);
+  byId("count-phone").textContent = share(withPhone);
+  byId("count-hours").textContent = share(withHours);
+  const registryDate = byId("coverage-registry-date");
+  registryDate.dateTime = window.farmacie.date;
+  registryDate.textContent = dateFormat.format(new Date(window.farmacie.date + "T00:00:00Z"));
+  if (window.recapitiOSM?.date) {
+    const osmDate = byId("coverage-osm-date");
+    osmDate.dateTime = window.recapitiOSM.date;
+    osmDate.textContent = dateFormat.format(new Date(window.recapitiOSM.date + "T00:00:00Z"));
+    byId("coverage-osm").hidden = false;
+  }
+  byId("coverage-unavailable").hidden = true;
+  byId("coverage-data").hidden = false;
 }

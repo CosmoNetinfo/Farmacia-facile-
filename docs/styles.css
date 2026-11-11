@@ -233,3 +233,38 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
   .footer-inner { padding-block: 8px 10px; gap: 4px 12px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.home-details { display: grid; gap: 12px; padding-block: 8px 28px; }
+.home-section { padding: 18px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); }
+.home-section h2 { font-size: clamp(20px, 2vw, 24px); margin-bottom: 8px; }
+.home-section > p { color: var(--muted); }
+.region-grid { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.region-card { width: 100%; display: grid; gap: 1px; align-content: center; min-height: 56px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; text-align: left; background: var(--surface); }
+.region-card:hover { border-color: #92c6a6; background: #eff9f2; }
+.region-card strong { font-size: 14px; line-height: 1.25; }
+.region-card span { color: var(--muted); font-size: 12px; }
+.coverage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.coverage-grid div { padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.coverage-grid dt { color: var(--muted); font-size: 12px; font-weight: 800; }
+.coverage-grid dd { margin: 2px 0 0; color: var(--green-dark); font: 800 16px/1.25 "Manrope", system-ui, sans-serif; }
+.coverage-note { font-size: 13px; color: var(--muted); }
+.home-source-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--green-dark); font-weight: 800; }
+.home-steps { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 12px; }
+.home-steps li { display: flex; align-items: flex-start; gap: 12px; }
+.home-steps li > [data-icon] { width: 38px; height: 38px; flex: 0 0 auto; border-radius: 9px; background: #e5f5ea; color: var(--green); font-size: 18px; }
+.home-steps h3 { font-size: 16px; }
+.home-steps p { color: var(--muted); }
+.home-links { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; padding: 0; }
+.turn-destinations summary { display: inline-flex; margin-top: 12px; cursor: pointer; list-style: none; }
+.turn-destinations summary::-webkit-details-marker { display: none; }
+.turn-destinations[open] summary { margin-bottom: 0; }
+.pharmacy-contact { margin-top: 12px; color: var(--muted); }
+.pharmacy-contact a { color: var(--green-dark); font-weight: 800; text-decoration: underline; }
+@media (min-width: 561px) {
+  .region-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  .coverage-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 861px) {
+  .home-details { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #regioni { grid-column: 1 / -1; }
+}

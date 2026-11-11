@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="leaflet/leaflet.css">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
   <script defer src="leaflet/leaflet.js"></script>
   <script defer src="farmacie.js"></script>
   <script defer src="comuni.js"></script>
@@ -24,7 +24,7 @@
   <script defer src="indirizzi.js"></script>
   <script defer src="orari-regionali.js"></script>
   <script defer src="schede-verificate.js"></script>
-  <script defer src="app.js?v=3"></script>
+  <script defer src="app.js?v=4"></script>
 </head>
 <body id="inizio">
   <header class="topbar">
@@ -138,6 +138,61 @@
       </div>
       <button id="show-more" type="button" class="secondary" hidden>Mostra altre</button>
     </section>
+
+    <div class="wrap home-details">
+      <section class="home-section" aria-labelledby="regions-title" id="regioni" hidden>
+        <h2 id="regions-title">Regioni</h2>
+        <ul id="region-list" class="region-grid"></ul>
+      </section>
+
+      <section class="home-section" aria-labelledby="turns-title">
+        <h2 id="turns-title">Farmacie di turno</h2>
+        <p>Turni disponibili a Firenze. In Friuli-Venezia Giulia e a Bolzano puoi consultare gli orari del giorno. Altrove verifica con la farmacia.</p>
+        <details class="turn-destinations">
+          <summary class="secondary">Vedi i territori <span data-icon="arrow-right"></span></summary>
+          <ul class="home-links">
+            <li><a class="secondary" href="?comune=Firenze&amp;provincia=FI#risultati">Firenze</a></li>
+            <li><button class="secondary" type="button" data-territory="Friuli-Venezia Giulia" aria-controls="area-form">Friuli-Venezia Giulia</button></li>
+            <li><button class="secondary" type="button" data-territory="Trentino-Alto Adige/Südtirol" data-province="BZ" aria-controls="area-form">Provincia di Bolzano</button></li>
+          </ul>
+        </details>
+      </section>
+
+      <section class="home-section" aria-labelledby="coverage-title">
+        <h2 id="coverage-title">Stato dei dati</h2>
+        <p id="coverage-unavailable">Dati non disponibili.</p>
+        <div id="coverage-data" hidden>
+          <dl class="coverage-grid">
+            <div><dt>Farmacie totali</dt><dd id="count-total"></dd></div>
+            <div><dt>Con coordinate</dt><dd id="count-coordinates"></dd></div>
+            <div><dt>Con telefono</dt><dd id="count-phone"></dd></div>
+            <div><dt>Con orari</dt><dd id="count-hours"></dd></div>
+          </dl>
+          <p class="coverage-note">Anagrafe del Ministero del <time id="coverage-registry-date"></time><span id="coverage-osm" hidden>. Telefoni e orari abituali da OpenStreetMap, estrazione del <time id="coverage-osm-date"></time></span>.</p>
+        </div>
+        <a class="home-source-link" href="#fonti" data-sources aria-haspopup="dialog" aria-controls="fonti">Fonti dei dati <span data-icon="arrow-right"></span></a>
+      </section>
+
+      <section class="home-section" aria-labelledby="steps-title">
+        <h2 id="steps-title">Come funziona</h2>
+        <ol class="home-steps">
+          <li><span data-icon="search"></span><div><h3>Cerca</h3><p>Usa la posizione o scegli un comune o una frazione.</p></div></li>
+          <li><span data-icon="list"></span><div><h3>Controlla</h3><p>Consulta indirizzo, mappa e orari disponibili.</p></div></li>
+          <li><span data-icon="phone"></span><div><h3>Chiama</h3><p>Conferma gli orari con la farmacia prima di uscire.</p></div></li>
+        </ol>
+      </section>
+
+      <section class="home-section" aria-labelledby="contribute-title">
+        <h2 id="contribute-title">Aiutaci a migliorare i dati</h2>
+        <p>Hai trovato un orario, un indirizzo o un recapito da correggere? Indicaci comune, provincia e il dato corretto.</p>
+        <ul class="home-links">
+          <li><a class="primary" href="https://github.com/CosmoNetinfo/Farmacia-facile-/issues/new?template=segnalazione.yml" target="_blank" rel="noopener noreferrer">Segnala un errore</a></li>
+          <li><a class="secondary" href="https://wa.me/393517064080" target="_blank" rel="noopener noreferrer">WhatsApp di CosmoNet</a></li>
+          <li><a class="secondary" href="https://t.me/cosmo_community1" target="_blank" rel="noopener noreferrer">Community Telegram</a></li>
+        </ul>
+        <p class="pharmacy-contact">Sei una farmacia? <a href="https://wa.me/393517064080" target="_blank" rel="noopener noreferrer">Scrivici su WhatsApp</a>.</p>
+      </section>
+    </div>
   </main>
 
   <footer>
