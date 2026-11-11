@@ -40,35 +40,7 @@ function external(label, url, className) {
 
 document.querySelectorAll("[data-icon]").forEach(node => { node.innerHTML = icon(node.dataset.icon); });
 
-const verified = {
-  16606: {
-    name: "BENU Farmacia Centrale 24H", phone: "+39051239690", hours: "Tutti i giorni, 24 ore su 24", alwaysOpen: true,
-    registryAddress: "Piazza Maggiore, 6",
-    site: "https://www.benufarma.it/farmacie/bologna/store-locator-6774-benu-farmacia-centrale-24h"
-  },
-  6995: {
-    name: "Farmacia del Pavaglione", phone: "+39051221640", hours: "Lun–sab 08:30–19:30",
-    registryAddress: "Via dell'Archiginnasio, 2/a",
-    site: "https://farmaciadelpavaglione.it/contatti-orari-farmacia-bologna/"
-  },
-  6992: {
-    name: "Antica Farmacia dei Servi", address: "Strada Maggiore, 39", phone: "+39051231638",
-    registryAddress: "Via Strada Maggiore, 39",
-    hours: "Lun–ven 08:30–20:00 · Sab–dom 09:00–19:00",
-    site: "https://almafarmacie.it/pharmacy/dei-servi/"
-  },
-  16238: {
-    name: "Farmacia De Sotgiu", phone: "+39070403080", hours: "Lun–sab 08:30–20:30",
-    registryAddress: "Via Pasquale Paoli, 59",
-    site: "https://www.farmaciadesotgiu.com/"
-  },
-  16245: {
-    name: "Farmacia Dedola", phone: "+39070305829",
-    registryAddress: "Via Curie, 31/33",
-    hours: "Lun–ven 08:30–14:00 e 16:00–20:00 (ott–mar) / 16:30–20:30 (apr–set) · Sab 08:30–14:00",
-    site: "https://www.farmaciadedola.it/"
-  }
-};
+const verified = new Map((window.schedeVerificate || []).map(record => [record.id, record]));
 const osmContacts = window.recapitiOSM?.records || {};
 const osmDays = { Mo: "Lun", Tu: "Mar", We: "Mer", Th: "Gio", Fr: "Ven", Sa: "Sab", Su: "Dom", PH: "Festivi" };
 function communityDetails(id) {
@@ -231,6 +203,11 @@ function pharmacyTurn(pharmacy) {
 function turnText(turn) {
   return "Di turno · " + turn.date.split("-").reverse().join("/") + " · " + turn.hours;
 }
+function verificationLink(info, className) {
+  const label = info.verifiedBy === "titolare" ? "Verificato dal titolare" : "Verificato da CosmoNet";
+  const date = info.verifiedOn.split("-").reverse().join("/");
+  return external(label + " · " + date, info.sourceUrl, className);
+}
 function opensAllDay(pharmacy) {
   const daily = dailyHours(pharmacy);
   return pharmacy.info?.alwaysOpen && (!daily || daily.hours === "00:00–24:00");
@@ -315,6 +292,7 @@ function card(pharmacy) {
   report.setAttribute("aria-controls", "report");
   actions.append(report);
   if (pharmacy.info?.source) actions.append(external("Fonte OSM", pharmacy.info.source, "card-source"));
+  if (pharmacy.info?.sourceUrl) actions.append(verificationLink(pharmacy.info, "card-source"));
   if (daily) actions.append(external(daily.label, daily.source, "card-source"));
   if (turn) actions.append(external(turn.label, turn.source, "card-source"));
   row.append(actions);
@@ -376,6 +354,7 @@ function popupContent(pharmacy) {
   }
   if (pharmacy.info?.site) actions.append(external("Sito web ↗", pharmacy.info.site));
   if (pharmacy.info?.source) actions.append(external("Fonte OSM", pharmacy.info.source));
+  if (pharmacy.info?.sourceUrl) actions.append(verificationLink(pharmacy.info));
   if (daily) actions.append(external(daily.label, daily.source));
   if (turn) actions.append(external(turn.label, turn.source));
   content.append(actions);
@@ -497,7 +476,7 @@ function renderProvinceOptions() {
   }
 }
 function toPharmacy([id, name, address, postcode, coords, type, village, localities], town, distance) {
-  const official = verified[id];
+  const official = verified.get(id);
   const info = official && normalize(official.registryAddress) === normalize(address) ? official : communityDetails(id);
   const standardName = name === name.toLocaleUpperCase("it-IT") ? titleCase(name) : name;
   const fullName = /\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(standardName)

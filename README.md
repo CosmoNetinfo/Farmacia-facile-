@@ -17,6 +17,7 @@ Sviluppata da [CosmoNet.info](https://www.cosmonet.info/).
 - **Filtri**: tutte le farmacie, con orari pubblicati, con numero di telefono, aperte 24 ore.
 - **Orari del giorno** per Friuli-Venezia Giulia e Provincia autonoma di Bolzano, letti dal browser dai dati aperti regionali.
 - **Farmacie di turno a Firenze**, con data e attribuzione al Comune. Il turno è indicato separatamente dagli orari di apertura.
+- **Schede verificate** per cinque farmacie di Bologna e Cagliari, con link alla fonte e data del controllo.
 - **Link condivisibili**: l'indirizzo della pagina contiene comune, provincia ed eventuale frazione, ad esempio `?comune=Spoleto&provincia=PG`.
 - **Nessun backend e nessun account**: è un sito statico, la ricerca avviene nel browser.
 - **Pannello "Fonti dei dati"** con tutte le fonti, le licenze e le date di estrazione.
@@ -70,6 +71,7 @@ docs/                     il sito pubblicato (HTML, CSS, JS, dati)
   comuni.js               comuni e frazioni ISTAT (generato)
   recapiti-osm.js         telefoni, siti e orari da OpenStreetMap (generato)
   orari-regionali.js      orari del giorno da FVG e Bolzano e turni di Firenze, letti dal browser
+  schede-verificate.js   schede curate, fonti e date di verifica
   indirizzi.js            normalizzazione degli indirizzi per gli abbinamenti
   leaflet/                libreria mappe
 aggiorna-dati.ps1         scarica Ministero e ISTAT e rigenera i dati
@@ -123,6 +125,12 @@ La posizione si chiede solo quando premi «Usa la mia posizione». L’app calco
 Il progetto è in una fase molto iniziale e ogni aiuto è benvenuto: segnalazioni di dati sbagliati, idee, test su dispositivi diversi. Apri una issue indicando comune, provincia e cosa ti aspettavi di vedere.
 
 Puoi correggere telefono, sito e orari (`opening_hours`) su OpenStreetMap dal dialogo «Segnala o correggi». Le modifiche arrivano al prossimo aggiornamento dell’estrazione OpenStreetMap. Per segnalare un errore a CosmoNet, anche per una farmacia priva di coordinate e di un oggetto OpenStreetMap abbinato, puoi usare GitHub, WhatsApp o Telegram.
+
+### Aggiungere una scheda verificata
+
+Verifica nome, recapiti e orari con il titolare o sul sito ufficiale della farmacia. Aggiungi una voce a `docs/schede-verificate.js` con l’`id` numerico ministeriale, `registryAddress` copiato dall’anagrafe, `name`, `phone`, `site`, `hours` e `alwaysOpen` (un booleano). Il campo facoltativo `address` permette di usare una grafia diversa per l’indirizzo mostrato.
+
+Indica la fonte in `sourceUrl` e la data effettiva del controllo in `verifiedOn` (formato `AAAA-MM-GG`). Usa `verifiedBy: "CosmoNet"` per una verifica redazionale e `verifiedBy: "titolare"` per una conferma diretta del titolare. Usa un solo record per ID. La scheda prevale sui recapiti OpenStreetMap se l’indirizzo continua a corrispondere all’anagrafe.
 
 ## Licenza e attribuzioni
 

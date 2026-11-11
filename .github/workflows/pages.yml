@@ -54,7 +54,7 @@ jobs:
         run: |
           set -euo pipefail
           assets=(farmacie.js comuni.js recapiti-osm.js)
-          for asset in app.js "${assets[@]}"; do
+          for asset in app.js schede-verificate.js "${assets[@]}"; do
             node --check "docs/$asset"
           done
 
