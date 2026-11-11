@@ -123,8 +123,11 @@ reportDialog.addEventListener("close", () => {
     : list.querySelector('[data-report="' + reportTrigger?.dataset.report + '"]');
   (trigger || directory).focus({ preventScroll: true });
 });
-document.querySelectorAll("[data-sources]").forEach(button => {
-  button.addEventListener("click", () => sourcesDialog.showModal());
+document.querySelectorAll("[data-sources]").forEach(trigger => {
+  trigger.addEventListener("click", event => {
+    event.preventDefault();
+    sourcesDialog.showModal();
+  });
 });
 if (window.location.hash === "#fonti") sourcesDialog.showModal();
 const directory = byId("risultati");
@@ -900,6 +903,14 @@ if (cities.length && window.farmacie?.date) {
   snapshot.dateTime = window.farmacie.date;
   snapshot.textContent = dateFormat.format(new Date(snapshot.dateTime + "T00:00:00Z"));
   byId("ministry-snapshot").hidden = false;
+  const homeDate = byId("home-dataset-date");
+  if (homeDate) {
+    const time = homeDate.querySelector("time");
+    homeDate.querySelector("span").textContent = /-(?:01|08|11)$/.test(snapshot.dateTime) ? "all’" : "al ";
+    time.dateTime = snapshot.dateTime;
+    time.textContent = snapshot.textContent;
+    homeDate.hidden = false;
+  }
   if (window.recapitiOSM?.date) {
     const date = new Date(window.recapitiOSM.date + "T00:00:00Z");
     byId("osm-date").textContent = "Estrazione OpenStreetMap del " + dateFormat.format(date) + ". ";
