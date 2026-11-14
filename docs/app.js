@@ -274,6 +274,14 @@ function card(pharmacy) {
   if (hours || !daily) {
     content.append(withIcon(element("p", "card-hours"), "clock", daily ? "Orario abituale · " + hours : hours || "Orari non disponibili"));
   }
+  const serviceNames = new Map((window.servizi || []).map(([key, label]) => [key, label]));
+  const services = (pharmacy.info?.services || []).filter(key => serviceNames.has(key));
+  if (services.length) {
+    const chips = element("ul", "service-chips");
+    chips.setAttribute("aria-label", "Servizi comunicati dalla farmacia");
+    for (const key of services) chips.append(element("li", "", serviceNames.get(key)));
+    content.append(chips);
+  }
   head.append(withIcon(element("span", "card-icon"), "cross", ""), content);
   if (opensAllDay(pharmacy)) head.append(element("span", "status-badge", "24 ore"));
   row.append(head);
@@ -312,6 +320,7 @@ function getMatches() {
   if (filter.value === "24h") return pharmacies.filter(opensAllDay);
   if (filter.value === "hours") return pharmacies.filter(pharmacy => pharmacy.info?.hours || dailyHours(pharmacy));
   if (filter.value === "phone") return pharmacies.filter(pharmacy => pharmacy.info?.phone);
+  if (filter.value.startsWith("srv:")) return pharmacies.filter(pharmacy => pharmacy.info?.services?.includes(filter.value.slice(4)));
   return pharmacies;
 }
 function pageRows(matches) {
@@ -990,6 +999,30 @@ function initHomeDetails() {
 
   for (const button of document.querySelectorAll("[data-territory]")) {
     button.addEventListener("click", () => openArea(button.dataset.territory, button.dataset.province));
+  }
+
+  const usedServices = new Set([...verified.values()].flatMap(record => record.services || []));
+  const serviceOptions = (window.servizi || []).filter(([key]) => usedServices.has(key));
+  if (serviceOptions.length) {
+    const group = document.createElement("optgroup");
+    group.label = "Servizi in farmacia";
+    for (const [key, label] of serviceOptions) {
+      const option = document.createElement("option");
+      option.value = "srv:" + key;
+      option.textContent = label;
+      group.append(option);
+    }
+    filter.append(group);
+  }
+
+  const trustStats = byId("trust-stats");
+  if (trustStats) {
+    let reachable = 0;
+    for (const town of cities) for (const row of town.pharmacies) if (osmContacts[row[0]]?.[2] || verified.get(row[0])?.phone) reachable++;
+    const owners = [...verified.values()].filter(record => record.verifiedBy === "titolare").length;
+    trustStats.textContent = number.format(total) + " farmacie in anagrafe · " + number.format(reachable) + " con telefono · " +
+      number.format(verified.size) + " schede controllate" + (owners ? " · " + number.format(owners) + " verificate dal titolare" : "");
+    trustStats.hidden = false;
   }
 
   const share = value => number.format(value) + " (" + percent.format(value / total * 100) + "%)";

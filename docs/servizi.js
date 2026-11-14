@@ -1,0 +1,2 @@
+// Servizi che una farmacia può comunicare. Le chiavi sono salvate nel database: non rinominarle.
+window.servizi = [["pressione", "Misurazione pressione"], ["autoanalisi", "Autoanalisi (glicemia, colesterolo)"], ["ecg", "Elettrocardiogramma"], ["vaccini", "Vaccinazioni"], ["consegna", "Consegna a domicilio"], ["noleggio", "Noleggio attrezzature"], ["prenotazioni", "Prenotazione visite ed esami"], ["nutrizione", "Consulti nutrizionali"], ["dermocosmesi", "Consulti dermocosmetici"], ["animali", "Prodotti per animali"]];

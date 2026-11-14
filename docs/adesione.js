@@ -107,7 +107,21 @@ function loadPharmacies() {
 }
 
 comuneInput.addEventListener("input", loadPharmacies);
-window.addEventListener("load", initCities);
+function initServizi() {
+  const box = byId("servizi-lista");
+  for (const [key, label] of window.servizi || []) {
+    const item = document.createElement("label");
+    item.className = "check";
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = key;
+    const text = document.createElement("span");
+    text.textContent = label;
+    item.append(input, text);
+    box.append(item);
+  }
+}
+window.addEventListener("load", () => { initCities(); initServizi(); });
 
 function normalizePhone(raw) {
   const digits = raw.replace(/[^\d+]/g, "");
@@ -153,6 +167,7 @@ form.addEventListener("submit", async event => {
     phone, site: site || null,
     hours_text: hours || null,
     always_open: always,
+    servizi: [...document.querySelectorAll("#servizi-lista input:checked")].map(box => box.value),
     referente_nome: byId("nome").value.trim(),
     referente_ruolo: byId("ruolo").value,
     referente_email: email,

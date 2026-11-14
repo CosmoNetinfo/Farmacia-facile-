@@ -22,6 +22,7 @@ const entries = rows.map(row => [
   row.site ? "    site: " + q(row.site) + "," : null,
   "    hours: " + q(row.always_open ? "Tutti i giorni, 24 ore su 24" : row.hours_text) + ",",
   "    alwaysOpen: " + Boolean(row.always_open) + ",",
+  row.servizi?.length ? "    services: " + q(row.servizi) + "," : null,
   "    verifiedOn: " + q(row.verificata_il || today) + ",",
   '    verifiedBy: "titolare"',
   "  }"

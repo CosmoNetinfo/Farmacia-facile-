@@ -11,8 +11,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=8">
-  <link rel="stylesheet" href="adesione.css?v=2">
+  <link rel="stylesheet" href="adesione.css?v=3">
   <script defer src="farmacie.js"></script>
+  <script defer src="servizi.js"></script>
   <script defer src="adesione.js"></script>
 </head>
 <body>
@@ -62,7 +63,12 @@
       </fieldset>
 
       <fieldset>
-        <legend>4. Chi compila</legend>
+        <legend>4. Servizi offerti <small class="legend-note">(facoltativo)</small></legend>
+        <div id="servizi-lista" class="servizi-lista"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>5. Chi compila</legend>
         <label>Nome e cognome
           <input id="nome" type="text" autocomplete="name" required>
         </label>
@@ -81,7 +87,7 @@
       </fieldset>
 
       <fieldset>
-        <legend>5. Consensi</legend>
+        <legend>6. Consensi</legend>
         <label class="check"><input id="c-pub" type="checkbox" required> <span>Dichiaro di poter comunicare questi dati per conto della farmacia e acconsento a pubblicarli su Farmacia Vicino.</span></label>
         <label class="check"><input id="c-priv" type="checkbox" required> <span>Ho letto l'<a href="privacy.html" target="_blank" rel="noopener">informativa privacy</a>: i miei dati di contatto servono solo alla verifica e non sono pubblicati.</span></label>
       </fieldset>
