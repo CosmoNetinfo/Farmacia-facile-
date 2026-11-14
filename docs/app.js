@@ -10,6 +10,7 @@ const paths = {
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   phone: '<path d="M7 3H4c-1 0-1 1-1 2 0 8 8 16 16 16 1 0 2 0 2-1v-3l-5-2-2 2c-4-2-5-3-7-7l2-2-2-5z"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18z"/>',
+  share: '<circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="m8.3 10.8 7.4-4.4M8.3 13.2l7.4 4.4"/>',
   directions: '<path d="m21 3-6.5 18-3.7-7.8L3 9.5 21 3Z"/>',
   "arrow-right": '<path d="M4 12h15m-6-6 6 6-6 6"/>',
   "arrow-left": '<path d="M20 12H5m6 6-6-6 6-6"/>',
@@ -307,6 +308,11 @@ function card(pharmacy) {
     owner.href = "adesione.html?farmacia=" + pharmacy.id;
     actions.append(owner);
   }
+  const share = withIcon(element("button", "card-action"), "share", "Condividi");
+  share.type = "button";
+  share.dataset.share = pharmacy.id;
+  share.setAttribute("aria-label", "Condividi " + pharmacy.name);
+  actions.append(share);
   const report = element("button", "card-action", "Segnala o correggi");
   report.type = "button";
   report.dataset.report = pharmacy.id;
@@ -854,6 +860,12 @@ byId("list-view").addEventListener("click", () => setView("list"));
 byId("map-view").addEventListener("click", () => setView("map"));
 byId("map-fit").addEventListener("click", fitMarkers);
 list.addEventListener("click", event => {
+  const shareButton = event.target.closest("[data-share]");
+  if (shareButton) {
+    const item = pharmacies.find(entry => entry.id === Number(shareButton.dataset.share));
+    if (item) sharePharmacy(item, shareButton);
+    return;
+  }
   const report = event.target.closest("[data-report]");
   if (report) {
     const pharmacy = pharmacies.find(item => item.id === Number(report.dataset.report));
@@ -882,6 +894,28 @@ if (map) {
     else map.invalidateSize({ pan: false });
   });
   observer.observe(mapElement);
+}
+function shareUrl(pharmacy) {
+  const url = new URL(window.location.href);
+  url.hash = "";
+  for (const param of ["comune", "provincia", "frazione"]) url.searchParams.delete(param);
+  url.searchParams.set("comune", pharmacy.town.label);
+  url.searchParams.set("provincia", pharmacy.town.province);
+  return url.href;
+}
+async function sharePharmacy(pharmacy, button) {
+  const text = pharmacy.name + (pharmacy.address ? " - " + pharmacy.address : "") + ", " + pharmacy.town.label;
+  const url = shareUrl(pharmacy);
+  if (navigator.share) {
+    try { await navigator.share({ title: "Farmacia Vicino", text, url }); return; }
+    catch (error) { if (error.name === "AbortError") return; }
+  }
+  let copied = false;
+  try { await navigator.clipboard.writeText(text + "\n" + url); copied = true; } catch (error) { /* ripiego sotto */ }
+  const label = button.lastChild;
+  const original = label.textContent;
+  label.textContent = copied ? "Link copiato" : "Copia il link dalla barra";
+  setTimeout(() => { label.textContent = original; }, 2200);
 }
 function cityFromUrl() {
   const params = new URLSearchParams(window.location.search);
