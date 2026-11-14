@@ -16,17 +16,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="leaflet/leaflet.css">
-  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="stylesheet" href="styles.css?v=10">
   <script defer src="leaflet/leaflet.js"></script>
   <script defer src="farmacie.js"></script>
   <script defer src="comuni.js"></script>
   <script defer src="recapiti-osm.js"></script>
+  <script defer src="parafarmacie.js"></script>
   <script defer src="recapiti-regionali.js"></script>
   <script defer src="indirizzi.js"></script>
   <script defer src="orari-regionali.js"></script>
   <script defer src="schede-verificate.js"></script>
   <script defer src="servizi.js"></script>
-  <script defer src="app.js?v=11"></script>
+  <script defer src="app.js?v=12"></script>
 </head>
 <body id="inizio">
   <header class="topbar">
@@ -105,6 +106,10 @@
         </div>
       </div>
 
+      <div id="type-toggle" class="view-toggle type-toggle" aria-label="Tipo di esercizio" hidden>
+        <button id="type-farm" type="button" aria-pressed="true">Farmacie</button>
+        <button id="type-para" type="button" aria-pressed="false">Parafarmacie</button>
+      </div>
       <p id="nearby-coverage" hidden></p>
       <div id="no-pharmacies" class="empty no-pharmacies" hidden>
         <p>Nell’anagrafe del Ministero della Salute non risultano farmacie per questo comune.</p>
@@ -232,7 +237,7 @@
     </div>
     <section>
       <h3>Anagrafe delle farmacie</h3>
-      <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0)<span id="ministry-snapshot" hidden>, estrazione del <time></time></span>. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
+      <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0)<span id="ministry-snapshot" hidden>, estrazione del <time></time></span>. Le parafarmacie arrivano dal dataset <a href="https://www.dati.salute.gov.it/it/dataset/parafarmacie/" target="_blank" rel="noopener">Parafarmacie</a> dello stesso Ministero (IODL 2.0), con indirizzo e posizione ma senza orari o telefono. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
     </section>
     <section>
       <h3>Comuni e frazioni</h3>

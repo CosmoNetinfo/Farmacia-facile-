@@ -286,3 +286,6 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
 .trust-stats { max-width: 74ch; margin: 6px auto 0; color: var(--green-dark); font-size: 13px; font-weight: 700; }
 .service-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
 .service-chips li { padding: 3px 9px; border-radius: 999px; background: #e5f5ea; color: var(--green-dark); font-size: 12px; font-weight: 600; }
+
+.type-toggle { margin: 0 0 .9rem; width: fit-content; }
+.type-toggle[hidden] { display: none; }

@@ -1,11 +1,11 @@
 // Service worker di Farmacia Vicino: permette di riaprire l'app senza connessione.
 // Strategia: rete per prima (dati sempre aggiornati), copia salvata se la rete manca.
 // Cambia VERSIONE quando vuoi forzare la pulizia delle copie salvate.
-const VERSIONE = "v2";
+const VERSIONE = "v3";
 const CACHE = "farmacia-vicino-" + VERSIONE;
 const BASE = [
   "./", "index.html", "styles.css", "app.js", "favicon.svg", "manifest.webmanifest",
-  "farmacie.js", "comuni.js", "recapiti-osm.js", "recapiti-regionali.js", "indirizzi.js", "orari-regionali.js",
+  "farmacie.js", "comuni.js", "recapiti-osm.js", "parafarmacie.js", "recapiti-regionali.js", "indirizzi.js", "orari-regionali.js",
   "schede-verificate.js", "servizi.js", "leaflet/leaflet.js", "leaflet/leaflet.css"
 ];
 

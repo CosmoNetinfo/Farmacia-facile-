@@ -84,14 +84,13 @@ function villageName(raw) {
 }
 function buildCities() {
   const catalog = window.comuniIstat;
-  const data = window.farmacie?.cities || [];
   const byCode = new Map();
   function addCity(code, label, province, region, alias = "", division, provinceName = province) {
     const key = normalize(label);
     const town = {
       code, label, key, province, region, division, provinceName, provinces: new Set([province]),
       aliases: new Set([normalize(alias), loosePlaceKey(key)].filter(value => value && value !== key)),
-      localities: new Map(), pharmacies: []
+      localities: new Map(), pharmacies: [], parafarmacie: []
     };
     byCode.set(code, town);
     return town;
@@ -102,6 +101,7 @@ function buildCities() {
     if (!byName.has(town.key)) byName.set(town.key, []);
     byName.get(town.key).push(town);
   }
+  for (const [data, field] of [[window.farmacie?.cities || [], "pharmacies"], [window.parafarmacie?.cities || [], "parafarmacie"]])
   for (const [name, province, region, rows, code] of data) {
     const key = normalize(name);
     const successor = catalog?.redirects?.[code];
@@ -117,12 +117,14 @@ function buildCities() {
     for (const row of rows) {
       const localities = [former, villageName(row[6])].filter(Boolean);
       localities.forEach(label => town.localities.set(normalize(label), label));
-      town.pharmacies.push([...row, localities]);
+      town[field].push([...row, localities]);
     }
   }
   return [...byCode.values()].sort((a, b) => collator.compare(a.label, b.label) || collator.compare(a.province, b.province));
 }
 const cities = buildCities();
+let mode = "farm";
+const isPara = id => id >= 5000000;
 const byId = id => document.getElementById(id);
 const sourcesDialog = byId("fonti");
 const reportDialog = byId("report");
@@ -311,7 +313,7 @@ function card(pharmacy) {
   }
   if (pharmacy.info?.site) actions.append(withIcon(external("", pharmacy.info.site, "card-action"), "globe", "Sito web"));
   actions.append(withIcon(external("", directions(pharmacy), "card-action"), "directions", "Indicazioni"));
-  if (!pharmacy.info?.phone || !hours) {
+  if (!isPara(pharmacy.id) && (!pharmacy.info?.phone || !hours)) {
     const owner = element("a", "card-action", "Sei il titolare?");
     owner.href = "adesione.html?farmacia=" + pharmacy.id;
     actions.append(owner);
@@ -453,7 +455,9 @@ function render(refreshMap = true) {
   const rows = pageRows(matches);
   byId("result-count").textContent = nearby && !nearby.ranked.length
     ? "Nessuna farmacia trovata entro 50 km. Puoi cercare per comune o frazione."
-    : number.format(matches.length) + (matches.length === 1 ? " farmacia trovata" : " farmacie trovate");
+    : number.format(matches.length) + (mode === "para" && !nearby
+      ? (matches.length === 1 ? " parafarmacia trovata" : " parafarmacie trovate")
+      : (matches.length === 1 ? " farmacia trovata" : " farmacie trovate"));
   showMore.hidden = !nearby || pharmacies.length >= nearby.ranked.length;
   list.replaceChildren(...rows.map(card));
   byId("empty-list").hidden = matches.length > 0;
@@ -518,8 +522,8 @@ function toPharmacy([id, name, address, postcode, coords, type, village, localit
   const official = verified.get(id);
   const info = official && normalize(official.registryAddress) === normalize(address) ? official : communityDetails(id);
   const standardName = name === name.toLocaleUpperCase("it-IT") ? titleCase(name) : name;
-  const fullName = /\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(standardName)
-    ? standardName : (type.toLowerCase().includes("dispensario") ? "Dispensario " : "Farmacia ") + standardName;
+  const fullName = /\b(?:farmacia|farmacie|parafarmacia|parafarmacie|dispensario|apotheke)\b/i.test(standardName)
+    ? standardName : (isPara(id) ? "Parafarmacia " : type.toLowerCase().includes("dispensario") ? "Dispensario " : "Farmacia ") + standardName;
   const street = info?.address || (address === address.toLocaleUpperCase("it-IT") ? titleCase(address) : address);
   return { id, name: info?.name || fullName, registryAddress: address, address: [street, villageName(village) || localities[0]].filter(value => value && value !== "-").join(", "), postcode: postcode === "-" ? "" : postcode, coords, info, town, distance };
 }
@@ -543,7 +547,15 @@ function showCity(nextCity, scroll = false) {
   selection = undefined;
   filter.value = "all";
   const sortDistance = ([lat, lon]) => (lat - 44.494) ** 2 + ((lon - 11.344) * 0.71) ** 2;
-  const rows = city.locality ? city.pharmacies.filter(row => row[7].some(label => normalize(label) === normalize(city.locality))) : city.pharmacies;
+  mode = new URLSearchParams(window.location.search).get("tipo") === "parafarmacie" && nextCity.parafarmacie.length ? "para" : "farm";
+  const inLocality = source => city.locality ? source.filter(row => row[7].some(label => normalize(label) === normalize(city.locality))) : source;
+  const rows = inLocality(mode === "para" ? city.parafarmacie : city.pharmacies);
+  const typeToggle = byId("type-toggle");
+  typeToggle.hidden = !nextCity.parafarmacie.length;
+  byId("type-farm").textContent = "Farmacie (" + number.format(inLocality(city.pharmacies).length) + ")";
+  byId("type-para").textContent = "Parafarmacie (" + number.format(inLocality(city.parafarmacie).length) + ")";
+  byId("type-farm").setAttribute("aria-pressed", String(mode === "farm"));
+  byId("type-para").setAttribute("aria-pressed", String(mode === "para"));
   pharmacies = rows.map(row => toPharmacy(row, city)).sort((a, b) => {
     if (city.key === "bologna") {
       const curatedOrder = [16606, 6995, 6992];
@@ -562,7 +574,7 @@ function showCity(nextCity, scroll = false) {
   if (!hasPharmacies) renderProvinceOptions();
   const location = city.locality ? city.label + " (" + city.province + ")" : city.region + " · " + city.province;
   withIcon(byId("location-label"), "pin", location);
-  byId("result-title").textContent = "Farmacie a " + (city.locality || city.label);
+  byId("result-title").textContent = (mode === "para" ? "Parafarmacie a " : "Farmacie a ") + (city.locality || city.label);
   render();
   loadRegionalHours();
   if (scroll) focusResults();
@@ -612,6 +624,8 @@ function showNearby(origin) {
   url.hash = "risultati";
   if (url.href !== window.location.href) window.history.pushState(null, "", url);
 
+  mode = "farm";
+  byId("type-toggle").hidden = true;
   pharmacies = [];
   appendNearbyBatch();
   page = 0;
@@ -866,6 +880,15 @@ function setView(next) {
   byId("map-view").setAttribute("aria-pressed", String(view === "map"));
   updateMap(getMatches());
 }
+function setMode(next) {
+  if (!city || mode === next) return;
+  const url = new URL(window.location.href);
+  if (next === "para") url.searchParams.set("tipo", "parafarmacie"); else url.searchParams.delete("tipo");
+  window.history.replaceState(null, "", url);
+  showCity(city);
+}
+byId("type-farm").addEventListener("click", () => setMode("farm"));
+byId("type-para").addEventListener("click", () => setMode("para"));
 byId("list-view").addEventListener("click", () => setView("list"));
 byId("map-view").addEventListener("click", () => setView("map"));
 byId("map-fit").addEventListener("click", fitMarkers);
@@ -911,6 +934,8 @@ function shareUrl(pharmacy) {
   for (const param of ["comune", "provincia", "frazione"]) url.searchParams.delete(param);
   url.searchParams.set("comune", pharmacy.town.label);
   url.searchParams.set("provincia", pharmacy.town.province);
+  if (isPara(pharmacy.id)) url.searchParams.set("tipo", "parafarmacie");
+  else url.searchParams.delete("tipo");
   return url.href;
 }
 async function sharePharmacy(pharmacy, button) {
