@@ -43,17 +43,25 @@ document.querySelectorAll("[data-icon]").forEach(node => { node.innerHTML = icon
 
 const verified = new Map((window.schedeVerificate || []).map(record => [record.id, record]));
 const osmContacts = window.recapitiOSM?.records || {};
+const regionalContacts = window.recapitiRegionali?.records || {};
+const regionalSources = window.recapitiRegionali?.sources || {};
 const osmDays = { Mo: "Lun", Tu: "Mar", We: "Mer", Th: "Gio", Fr: "Ven", Sa: "Sab", Su: "Dom", PH: "Festivi" };
 function communityDetails(id) {
   const record = osmContacts[id];
-  if (!record) return undefined;
-  const [type, osmId, phone, site, schedule] = record;
+  const regional = regionalContacts[id];
+  const regionalSource = regional && regionalSources[regional[1]];
+  if (!record) {
+    return regionalSource ? { phone: regional[0], source: regionalSource.url, sourceLabel: "Fonte: " + regionalSource.label } : undefined;
+  }
+  const [type, osmId, osmPhone, site, schedule] = record;
+  const phone = osmPhone || regional?.[0];
   const alwaysOpen = schedule === "24/7";
   const hours = alwaysOpen ? "Tutti i giorni, 24 ore su 24" : schedule?.split(";").map(rule =>
     rule.trim().replace(/\b(?:Mo|Tu|We|Th|Fr|Sa|Su|PH)\b/g, day => osmDays[day]).replace(/\boff\b/g, "chiuso")
       .replaceAll("-", "–").replace(/,(\S)/g, ", $1")
   ).join(" · ");
-  return { phone, site, hours, alwaysOpen, source: "https://www.openstreetmap.org/" + type + "/" + osmId };
+  const phoneFromRegion = !osmPhone && regionalSource;
+  return { phone, site, hours, alwaysOpen, source: "https://www.openstreetmap.org/" + type + "/" + osmId, phoneSource: phoneFromRegion ? { url: regionalSource.url, label: "Telefono: " + regionalSource.label } : undefined };
 }
 const collator = new Intl.Collator("it", { sensitivity: "base" });
 const number = new Intl.NumberFormat("it-IT");
@@ -319,7 +327,8 @@ function card(pharmacy) {
   report.setAttribute("aria-haspopup", "dialog");
   report.setAttribute("aria-controls", "report");
   actions.append(report);
-  if (pharmacy.info?.source) actions.append(external("Fonte OSM", pharmacy.info.source, "card-source"));
+  if (pharmacy.info?.source) actions.append(external(pharmacy.info.sourceLabel || "Fonte OSM", pharmacy.info.source, "card-source"));
+  if (pharmacy.info?.phoneSource) actions.append(external(pharmacy.info.phoneSource.label, pharmacy.info.phoneSource.url, "card-source"));
   if (pharmacy.info?.sourceUrl) actions.append(verificationLink(pharmacy.info, "card-source"));
   if (daily) actions.append(external(daily.label, daily.source, "card-source"));
   if (turn) actions.append(external(turn.label, turn.source, "card-source"));
@@ -382,7 +391,8 @@ function popupContent(pharmacy) {
     actions.append(call);
   }
   if (pharmacy.info?.site) actions.append(external("Sito web ↗", pharmacy.info.site));
-  if (pharmacy.info?.source) actions.append(external("Fonte OSM", pharmacy.info.source));
+  if (pharmacy.info?.source) actions.append(external(pharmacy.info.sourceLabel || "Fonte OSM", pharmacy.info.source));
+  if (pharmacy.info?.phoneSource) actions.append(external(pharmacy.info.phoneSource.label, pharmacy.info.phoneSource.url));
   if (pharmacy.info?.sourceUrl) actions.append(verificationLink(pharmacy.info));
   if (daily) actions.append(external(daily.label, daily.source));
   if (turn) actions.append(external(turn.label, turn.source));
@@ -1015,7 +1025,7 @@ function initHomeDetails() {
       if (coords?.length === 2 && coords.every(Number.isFinite) &&
           Math.abs(coords[0]) <= 90 && Math.abs(coords[1]) <= 180) withCoordinates++;
       const record = osmContacts[row[0]];
-      if (record?.[2]) withPhone++;
+      if (record?.[2] || regionalContacts[row[0]]) withPhone++;
       if (record?.[4]) withHours++;
     }
   }
@@ -1057,7 +1067,7 @@ function initHomeDetails() {
   const trustStats = byId("trust-stats");
   if (trustStats) {
     let reachable = 0;
-    for (const town of cities) for (const row of town.pharmacies) if (osmContacts[row[0]]?.[2] || verified.get(row[0])?.phone) reachable++;
+    for (const town of cities) for (const row of town.pharmacies) if (osmContacts[row[0]]?.[2] || regionalContacts[row[0]] || verified.get(row[0])?.phone) reachable++;
     const owners = [...verified.values()].filter(record => record.verifiedBy === "titolare").length;
     trustStats.textContent = number.format(total) + " farmacie in anagrafe · " + number.format(reachable) + " con telefono · " +
       number.format(verified.size) + " schede controllate" + (owners ? " · " + number.format(owners) + " verificate dal titolare" : "");

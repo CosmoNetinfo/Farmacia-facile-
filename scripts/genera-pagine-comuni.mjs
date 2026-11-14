@@ -10,6 +10,7 @@ const load = file => { const window = {}; new Function("window", fs.readFileSync
 const { farmacie } = load("farmacie.js");
 const { comuniIstat } = load("comuni.js");
 const osm = load("recapiti-osm.js").recapitiOSM?.records || {};
+const regional = load("recapiti-regionali.js").recapitiRegionali?.records || {};
 const verified = new Map((load("schede-verificate.js").schedeVerificate || []).map(r => [r.id, r]));
 const servizi = new Map(load("servizi.js").servizi);
 
@@ -92,7 +93,7 @@ for (const t of list) {
   const items = rows.map(([id, name, address, cap, , type]) => {
     const info = verified.get(id) && normalize(verified.get(id).registryAddress) === normalize(address) ? verified.get(id) : undefined;
     const rec = osm[id];
-    const phone = info?.phone || rec?.[2];
+    const phone = info?.phone || rec?.[2] || regional[id]?.[0];
     const hours = info ? info.hours : osmHours(rec?.[4]);
     const title = info?.name || (/\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(name) ? titleCase(name) : (/dispensario/i.test(type) ? "Dispensario " : "Farmacia ") + titleCase(name));
     const street = /\p{Lu}{3,}/u.test(address) ? titleCase(address) : address;
