@@ -957,7 +957,9 @@ function initHomeDetails() {
     groups.get(key).count += town.pharmacies.length;
     for (const row of town.pharmacies) {
       total++;
-      if (row[4]?.length) withCoordinates++;
+      const coords = row[4];
+      if (coords?.length === 2 && coords.every(Number.isFinite) &&
+          Math.abs(coords[0]) <= 90 && Math.abs(coords[1]) <= 180) withCoordinates++;
       const record = osmContacts[row[0]];
       if (record?.[2]) withPhone++;
       if (record?.[4]) withHours++;
@@ -985,7 +987,7 @@ function initHomeDetails() {
   }
 
   const share = value => number.format(value) + " (" + percent.format(value / total * 100) + "%)";
-  byId("count-total").textContent = number.format(total);
+  byId("count-total").textContent = number.format(total) + " (100%)";
   byId("count-coordinates").textContent = share(withCoordinates);
   byId("count-phone").textContent = share(withPhone);
   byId("count-hours").textContent = share(withHours);
