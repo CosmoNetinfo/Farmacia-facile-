@@ -1,0 +1,13 @@
+.pagina .crumbs { margin: 0 0 14px; color: var(--muted); font-size: .9rem; }
+.pagina .crumbs a { color: var(--green); }
+.pagina h2 { font-family: Manrope, sans-serif; font-size: 1.25rem; margin: 28px 0 8px; }
+.pagina ul.farmacie, .pagina ul.comuni { list-style: none; padding: 0; margin: 18px 0; }
+.pagina .farmacia { padding: 14px 16px; margin: 0 0 10px; background: var(--white); border: 1px solid var(--border); border-radius: 14px; }
+.pagina .farmacia h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.pagina .farmacia p { margin: 2px 0; }
+.pagina .farmacia .orari { color: var(--green-dark); font-weight: 600; }
+.pagina .farmacia a { color: var(--green); font-weight: 600; }
+.pagina ul.comuni { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px 16px; }
+.pagina ul.comuni a { color: var(--green); font-weight: 600; }
+.pagina ul.comuni span { color: var(--muted); font-size: .85rem; }
+.pagina a.primary { display: inline-block; padding: 12px 20px; border-radius: 12px; background: var(--green); color: #fff; font-weight: 700; }
