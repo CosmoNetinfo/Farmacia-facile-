@@ -41,3 +41,14 @@ Le consultazioni HTML e gli allegati della tabella sono piste per il controllo m
 3. **Lombardia.** L’API REST è documentata e copre la regione. La valutazione tecnica dipende dall’accesso autorizzato e dal permesso di riuso. Se l’accesso richiede un segreto, il flusso andrebbe valutato tramite aggiornamento programmato con GitHub Actions. Quel flusso terrebbe il segreto fuori dal sito e pubblicherebbe un file locale, ma introdurrebbe ritardo tra aggiornamenti e dipendenza dall’esecuzione del workflow.
 
 L’Umbria è adatta come verifica manuale con la USL e Federfarma. Per un pilota automatico serve prima un feed pubblico documentato. FVG e Bolzano restano i riferimenti per il codice esistente e possono essere valutati in seguito per mostrare i turni come voce distinta.
+
+## Verifica del 14 novembre 2026
+
+Controllo ulteriore sulle piste aperte. Non è una ricerca esaustiva su tutti gli enti.
+
+- **Veneto, Venezia.** La [pagina dei turni dell'Ordine](https://www.ordinefarmacistivenezia.it/farmacie-di-turno.html) dichiara export XML e JSON «in formato aperto». Né la pagina né le [note legali](https://www.ordinefarmacistivenezia.it/note-legali.html) riportano una licenza o condizioni di riuso. Il link di export contiene un parametro che in due letture è risultato diverso, quindi è probabilmente un token di sessione e non un indirizzo stabile. Prima di integrare serve chiedere all'Ordine licenza e un endpoint stabile (ordine@ordinefarmacistivenezia.it).
+- **Lombardia.** L'[API di Federfarma Lombardia](https://www.federfarmalombardia.it/servizi/api-federfarmalombardia-intro/) è gratuita per associati ed enti pubblici autorizzati. Per le aziende è a pagamento: 50 euro più IVA al mese, contratto di almeno 12 mesi, 20.000 chiamate incluse. Il diritto di ripubblicazione non è dichiarato. Per ora non è adatta.
+- **Lazio, Campania, Puglia.** I dataset regionali trovati contengono l'anagrafe, in parte derivata dal Ministero. Non è stato trovato un dataset aperto dei turni.
+- **Aggregatori commerciali.** Servizi come PharmAround o farmaciaditurno.org sono privati e non dichiarano una licenza aperta. Non sono fonti utilizzabili.
+
+Ordine aggiornato dei territori: Firenze (fatto), poi Venezia, previa risposta dell'Ordine, e Umbria con verifica manuale. Per gli altri territori si può chiedere agli Ordini provinciali un feed con licenza esplicita.
