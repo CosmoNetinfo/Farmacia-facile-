@@ -8,6 +8,7 @@
 .adesione input[type=text], .adesione input[type=tel], .adesione input[type=email], .adesione input[type=url], .adesione select { width: 100%; margin-top: 6px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--white); color: var(--ink); }
 .adesione .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; }
 .adesione .check input { margin-top: 4px; }
+.adesione .check a { color: var(--green); text-decoration: underline; }
 .adesione .hours-grid { display: grid; grid-template-columns: 70px repeat(4, 1fr); gap: 6px; align-items: center; margin-bottom: 14px; }
 .adesione .hours-grid input { margin: 0; padding: 8px 6px; border: 1px solid var(--border); border-radius: 10px; width: 100%; }
 .adesione .hours-head { font-size: .8rem; color: var(--muted); }
