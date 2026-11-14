@@ -37,6 +37,18 @@ h1, h2, h3, .brand { font-family: "Manrope", "DM Sans", system-ui, sans-serif; }
 .topbar nav { display: flex; align-items: center; gap: 30px; font-weight: 700; font-size: 13px; }
 .topbar nav a, .topbar nav .sources-trigger { display: flex; align-items: center; gap: 6px; color: var(--muted); }
 .topbar nav a:hover, .topbar nav .sources-trigger:hover, .topbar nav .nav-active { color: var(--green); }
+.menu { position: relative; }
+.menu summary { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; color: var(--ink); cursor: pointer; list-style: none; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu summary:hover, .menu[open] summary { border-color: var(--green); color: var(--green); }
+.menu-bars, .menu-bars::before, .menu-bars::after { display: block; width: 16px; height: 2px; border-radius: 2px; background: currentColor; }
+.menu-bars { position: relative; }
+.menu-bars::before, .menu-bars::after { content: ""; position: absolute; left: 0; }
+.menu-bars::before { top: -5px; }
+.menu-bars::after { top: 5px; }
+.menu-list { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; min-width: 220px; margin: 0; padding: 6px; list-style: none; background: var(--white); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 30px rgba(20,41,32,.14); }
+.topbar nav .menu-list a, .topbar nav .menu-list .sources-trigger { display: block; width: 100%; padding: 11px 12px; border-radius: 8px; color: var(--ink); font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+.topbar nav .menu-list a:hover, .topbar nav .menu-list .sources-trigger:hover { background: var(--surface); color: var(--green); }
 .sources-trigger { border: 0; background: transparent; padding: 0; font: inherit; }
 
 .hero { position: relative; z-index: 2; background: linear-gradient(108deg,#edf8ef 15%,#e4f5e9 77%,#d8f1e1); border-bottom: 1px solid #d5eadc; }
@@ -198,6 +210,8 @@ footer { border-top: 1px solid var(--border); background: white; scroll-margin-t
   .topbar-inner { min-height: 52px; }
   .topbar nav { gap: 12px; font-size: 11px; }
   .topbar nav .nav-active { display: none; }
+  .menu-label { display: none; }
+  .menu summary { padding: 0 11px; }
   .brand { font-size: 20px; gap: 7px; }
   .brand-mark { width: 31px; height: 31px; }
   .hero-inner { padding-block: 18px 14px; }

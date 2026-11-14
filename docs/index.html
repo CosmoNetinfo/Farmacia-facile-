@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="leaflet/leaflet.css">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
   <script defer src="leaflet/leaflet.js"></script>
   <script defer src="farmacie.js"></script>
   <script defer src="comuni.js"></script>
@@ -24,7 +24,7 @@
   <script defer src="indirizzi.js"></script>
   <script defer src="orari-regionali.js"></script>
   <script defer src="schede-verificate.js"></script>
-  <script defer src="app.js?v=5"></script>
+  <script defer src="app.js?v=6"></script>
 </head>
 <body id="inizio">
   <header class="topbar">
@@ -35,7 +35,16 @@
       </a>
       <nav aria-label="Navigazione principale">
         <a class="nav-active" href="#esplora">Esplora farmacie</a>
-        <button type="button" class="sources-trigger" data-sources aria-haspopup="dialog" aria-controls="fonti">Fonti dei dati <span data-icon="arrow-right"></span></button>
+        <details class="menu" data-menu>
+          <summary aria-label="Apri il menu"><span class="menu-bars" aria-hidden="true"></span><span class="menu-label">Menu</span></summary>
+          <ul class="menu-list">
+            <li><a href="#esplora">Esplora farmacie</a></li>
+            <li><button type="button" class="sources-trigger" data-sources aria-haspopup="dialog" aria-controls="fonti">Fonti dei dati</button></li>
+            <li><a href="adesione.html">Sei una farmacia?</a></li>
+            <li><a href="privacy.html">Informativa privacy</a></li>
+            <li><a href="https://github.com/CosmoNetinfo/Farmacia-facile-/issues/new?template=segnalazione.yml" target="_blank" rel="noopener noreferrer">Segnala un errore</a></li>
+          </ul>
+        </details>
       </nav>
     </div>
   </header>
@@ -200,6 +209,8 @@
       <a class="brand" href="#inizio"><img class="brand-mark" src="favicon.svg" alt="" width="26" height="26"><span>Farmacia<span class="brand-accent">Vicino</span></span></a>
       <div class="footer-links">
         <a class="sources-trigger" href="#fonti" data-sources aria-haspopup="dialog" aria-controls="fonti">Fonti dei dati</a>
+        <a href="adesione.html">Sei una farmacia?</a>
+        <a href="privacy.html">Privacy</a>
         <a class="back-top" href="#inizio">Torna su <span data-icon="arrow-up"></span></a>
       </div>
       <p class="footer-version"><strong>v1.0 beta</strong> · dati in ampliamento</p>

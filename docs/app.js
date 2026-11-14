@@ -129,6 +129,12 @@ document.querySelectorAll("[data-sources]").forEach(trigger => {
     sourcesDialog.showModal();
   });
 });
+const menu = document.querySelector("[data-menu]");
+if (menu) {
+  document.addEventListener("click", event => { if (!menu.contains(event.target)) menu.open = false; });
+  menu.addEventListener("click", event => { if (event.target.closest("a, button")) menu.open = false; });
+  document.addEventListener("keydown", event => { if (event.key === "Escape") menu.open = false; });
+}
 if (window.location.hash === "#fonti") sourcesDialog.showModal();
 const directory = byId("risultati");
 const list = byId("pharmacies");
