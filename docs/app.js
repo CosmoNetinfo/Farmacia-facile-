@@ -302,6 +302,11 @@ function card(pharmacy) {
   }
   if (pharmacy.info?.site) actions.append(withIcon(external("", pharmacy.info.site, "card-action"), "globe", "Sito web"));
   actions.append(withIcon(external("", directions(pharmacy), "card-action"), "directions", "Indicazioni"));
+  if (!pharmacy.info?.phone || !hours) {
+    const owner = element("a", "card-action", "Sei il titolare?");
+    owner.href = "adesione.html?farmacia=" + pharmacy.id;
+    actions.append(owner);
+  }
   const report = element("button", "card-action", "Segnala o correggi");
   report.type = "button";
   report.dataset.report = pharmacy.id;
@@ -1041,4 +1046,8 @@ function initHomeDetails() {
   }
   byId("coverage-unavailable").hidden = true;
   byId("coverage-data").hidden = false;
+}
+
+if ("serviceWorker" in navigator && window.location.protocol === "https:") {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
 }

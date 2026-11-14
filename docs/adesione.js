@@ -121,7 +121,16 @@ function initServizi() {
     box.append(item);
   }
 }
-window.addEventListener("load", () => { initCities(); initServizi(); });
+function prefillFromUrl() {
+  const id = Number(new URLSearchParams(window.location.search).get("farmacia"));
+  if (!id) return;
+  const city = cities.find(entry => entry[3].some(pharmacy => pharmacy[0] === id));
+  if (!city) return;
+  comuneInput.value = titleCase(city[0]) + " (" + city[1] + ")";
+  loadPharmacies();
+  selectFarmacia.value = String(id);
+}
+window.addEventListener("load", () => { initCities(); initServizi(); prefillFromUrl(); });
 
 function normalizePhone(raw) {
   const digits = raw.replace(/[^\d+]/g, "");
