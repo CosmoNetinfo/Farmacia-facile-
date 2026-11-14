@@ -1,0 +1,20 @@
+.adesione { max-width: 720px; margin: 0 auto; padding: 32px 20px 64px; }
+.adesione h1 { font-family: Manrope, sans-serif; font-size: 2rem; line-height: 1.15; margin: 0 0 8px; }
+.adesione .lead { color: var(--muted); margin: 0 0 24px; }
+.adesione fieldset { border: 1px solid var(--border); border-radius: var(--radius); background: var(--white); padding: 18px 18px 8px; margin: 0 0 18px; }
+.adesione legend { font-weight: 700; padding: 0 6px; }
+.adesione label { display: block; font-weight: 600; margin: 0 0 14px; }
+.adesione label small { display: block; font-weight: 400; color: var(--muted); }
+.adesione input[type=text], .adesione input[type=tel], .adesione input[type=email], .adesione input[type=url], .adesione select { width: 100%; margin-top: 6px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--white); color: var(--ink); }
+.adesione .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; }
+.adesione .check input { margin-top: 4px; }
+.adesione .hours-grid { display: grid; grid-template-columns: 70px repeat(4, 1fr); gap: 6px; align-items: center; margin-bottom: 14px; }
+.adesione .hours-grid input { margin: 0; padding: 8px 6px; border: 1px solid var(--border); border-radius: 10px; width: 100%; }
+.adesione .hours-head { font-size: .8rem; color: var(--muted); }
+.adesione .hp { position: absolute; left: -9999px; }
+.adesione .note { color: var(--muted); font-size: .9rem; }
+.adesione .msg { padding: 12px 14px; border-radius: 12px; margin: 14px 0; }
+.adesione .msg.ok { background: #e3f4ea; color: #05643a; }
+.adesione .msg.err { background: #fdeaea; color: #8a1c1c; }
+.adesione button.primary { padding: 13px 22px; border: 0; border-radius: 12px; background: var(--green); color: #fff; font-weight: 700; }
+@media (max-width: 560px) { .adesione .hours-grid { grid-template-columns: 54px repeat(4, 1fr); font-size: .85rem; } }

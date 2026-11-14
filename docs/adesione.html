@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sei una farmacia? Comunica a Farmacia Vicino telefono, sito e orari. Li verifichiamo prima di pubblicarli.">
+  <meta name="robots" content="noindex">
+  <title>Sei una farmacia? — Farmacia Vicino</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="adesione.css">
+  <script defer src="farmacie.js"></script>
+  <script defer src="adesione.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="./" aria-label="Farmacia Vicino, torna alla home">
+        <img class="brand-mark" src="favicon.svg" alt="" width="36" height="36"><span>Farmacia<span class="brand-accent">Vicino</span></span>
+        <span class="brand-beta">Beta</span>
+      </a>
+    </div>
+  </header>
+  <main class="adesione">
+    <h1>Sei una farmacia?</h1>
+    <p class="lead">Comunicaci telefono, sito e orari. Li controlliamo prima di pubblicarli, e la scheda mostrerà «Verificato dal titolare».</p>
+
+    <form id="adesione-form" novalidate>
+      <fieldset>
+        <legend>1. La tua farmacia</legend>
+        <label>Comune
+          <input id="comune" type="text" list="comuni-lista" autocomplete="off" placeholder="Scrivi il comune" required>
+          <datalist id="comuni-lista"></datalist>
+        </label>
+        <label>Farmacia
+          <select id="farmacia" required disabled><option value="">Scegli prima il comune</option></select>
+          <small>Se non la trovi, scrivici su WhatsApp: l'elenco è quello del Ministero della Salute.</small>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>2. Contatti da pubblicare</legend>
+        <label>Telefono
+          <input id="phone" type="tel" inputmode="tel" placeholder="Es. 06 1234567" required>
+        </label>
+        <label>Sito web <small>Facoltativo</small>
+          <input id="site" type="url" placeholder="https://">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>3. Orari abituali</legend>
+        <label class="check"><input id="always" type="checkbox"> Aperta 24 ore su 24, tutti i giorni</label>
+        <div id="hours-wrap">
+          <p class="note">Lascia vuoti i giorni di chiusura. Usa la seconda fascia solo se c'è la pausa.</p>
+          <div class="hours-grid hours-head" aria-hidden="true"><span></span><span>Apre</span><span>Chiude</span><span>Riapre</span><span>Chiude</span></div>
+          <div id="hours-grid"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>4. Chi compila</legend>
+        <label>Nome e cognome
+          <input id="nome" type="text" autocomplete="name" required>
+        </label>
+        <label>Ruolo
+          <select id="ruolo" required>
+            <option value="">Scegli</option>
+            <option value="titolare">Titolare</option>
+            <option value="direttore">Direttore</option>
+            <option value="delegato">Delegato dalla farmacia</option>
+          </select>
+        </label>
+        <label>Email
+          <input id="email" type="email" autocomplete="email" required>
+          <small>Serve solo per verificare la richiesta. Non viene pubblicata.</small>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>5. Consensi</legend>
+        <label class="check"><input id="c-pub" type="checkbox" required> Dichiaro di poter comunicare questi dati per conto della farmacia e acconsento a pubblicarli su Farmacia Vicino.</label>
+        <label class="check"><input id="c-priv" type="checkbox" required> Ho letto l'<a href="privacy.html" target="_blank" rel="noopener">informativa privacy</a>: i miei dati di contatto servono solo alla verifica e non sono pubblicati.</label>
+      </fieldset>
+
+      <label class="hp" aria-hidden="true">Non compilare <input id="sito-esca" type="text" tabindex="-1" autocomplete="off"></label>
+
+      <button class="primary" type="submit" id="invia">Invia la richiesta</button>
+      <div id="esito" role="status" aria-live="polite"></div>
+      <p class="note">Prima di pubblicare, CosmoNet verifica la richiesta, ad esempio richiamando il numero della farmacia che risulta dall'anagrafe. Finché non è verificata, la scheda non cambia.</p>
+    </form>
+  </main>
+</body>
+</html>
