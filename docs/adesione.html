@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Sei una farmacia? Comunica a Farmacia Vicino telefono, sito e orari. Li verifichiamo prima di pubblicarli.">
+  <meta name="description" content="Sei una farmacia o parafarmacia? Comunica a Farmacia Vicino telefono, sito e orari. Li verifichiamo prima di pubblicarli.">
   <meta name="robots" content="noindex">
-  <title>Sei una farmacia? — Farmacia Vicino</title>
+  <title>Sei una farmacia o parafarmacia? — Farmacia Vicino</title>
   <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,8 +13,9 @@
   <link rel="stylesheet" href="styles.css?v=8">
   <link rel="stylesheet" href="adesione.css?v=3">
   <script defer src="farmacie.js"></script>
+  <script defer src="parafarmacie.js"></script>
   <script defer src="servizi.js"></script>
-  <script defer src="adesione.js?v=2"></script>
+  <script defer src="adesione.js?v=3"></script>
 </head>
 <body>
   <header class="topbar">
@@ -26,19 +27,19 @@
     </div>
   </header>
   <main class="adesione">
-    <h1>Sei una farmacia?</h1>
+    <h1>Sei una farmacia o parafarmacia?</h1>
     <p class="lead">Comunicaci telefono, sito e orari. Li controlliamo prima di pubblicarli, e la scheda mostrerà «Verificato dal titolare».</p>
 
     <form id="adesione-form" novalidate>
       <fieldset>
-        <legend>1. La tua farmacia</legend>
+        <legend>1. La tua attività</legend>
         <label>Comune
           <input id="comune" type="text" list="comuni-lista" autocomplete="off" placeholder="Scrivi il comune" required>
           <datalist id="comuni-lista"></datalist>
         </label>
-        <label>Farmacia
+        <label>Farmacia o parafarmacia
           <select id="farmacia" required disabled><option value="">Scegli prima il comune</option></select>
-          <small>Se non la trovi, scrivici su WhatsApp: l'elenco è quello del Ministero della Salute.</small>
+          <small>Se non la trovi, scrivici su WhatsApp: gli elenchi sono quelli del Ministero della Salute.</small>
         </label>
       </fieldset>
 
@@ -77,7 +78,7 @@
             <option value="">Scegli</option>
             <option value="titolare">Titolare</option>
             <option value="direttore">Direttore</option>
-            <option value="delegato">Delegato dalla farmacia</option>
+            <option value="delegato">Delegato dall'attività</option>
           </select>
         </label>
         <label>Email
@@ -88,7 +89,7 @@
 
       <fieldset>
         <legend>6. Consensi</legend>
-        <label class="check"><input id="c-pub" type="checkbox" required> <span>Dichiaro di poter comunicare questi dati per conto della farmacia e acconsento a pubblicarli su Farmacia Vicino.</span></label>
+        <label class="check"><input id="c-pub" type="checkbox" required> <span>Dichiaro di poter comunicare questi dati per conto dell'attività e acconsento a pubblicarli su Farmacia Vicino.</span></label>
         <label class="check"><input id="c-priv" type="checkbox" required> <span>Ho letto l'<a href="privacy.html" target="_blank" rel="noopener">informativa privacy</a>: i miei dati di contatto servono solo alla verifica e non sono pubblicati.</span></label>
       </fieldset>
 
@@ -96,7 +97,7 @@
 
       <button class="primary" type="submit" id="invia">Invia la richiesta</button>
       <div id="esito" role="status" aria-live="polite"></div>
-      <p class="note">Prima di pubblicare, CosmoNet verifica la richiesta, ad esempio richiamando il numero della farmacia che risulta dall'anagrafe. Finché non è verificata, la scheda non cambia.</p>
+      <p class="note">Prima di pubblicare, CosmoNet verifica la richiesta, ad esempio richiamando il numero che risulta dall'anagrafe. Finché non è verificata, la scheda non cambia.</p>
     </form>
   </main>
 </body>

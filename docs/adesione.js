@@ -79,7 +79,17 @@ const selectFarmacia = byId("farmacia");
 let cities = [];
 
 function initCities() {
-  cities = (window.farmacie && window.farmacie.cities) || [];
+  // Farmacie e parafarmacie, unite per comune
+  const byKey = new Map();
+  for (const source of [window.farmacie, window.parafarmacie]) {
+    for (const city of (source && source.cities) || []) {
+      const key = city[0] + "|" + city[1];
+      const entry = byKey.get(key);
+      if (entry) entry[3] = entry[3].concat(city[3]);
+      else byKey.set(key, [city[0], city[1], city[2], city[3].slice()]);
+    }
+  }
+  cities = [...byKey.values()];
   const labels = cities.map(city => titleCase(city[0]) + " (" + city[1] + ")").sort((a, b) => a.localeCompare(b, "it"));
   comuniLista.replaceChildren(...labels.map(label => {
     const option = document.createElement("option");
@@ -97,9 +107,9 @@ function loadPharmacies() {
     return;
   }
   selectFarmacia.disabled = false;
-  selectFarmacia.append(new Option("Scegli la farmacia", ""));
+  selectFarmacia.append(new Option("Scegli la tua attività", ""));
   city[3].slice().sort((a, b) => a[1].localeCompare(b[1], "it")).forEach(pharmacy => {
-    const option = new Option(titleCase(pharmacy[1]) + " — " + pharmacy[2], String(pharmacy[0]));
+    const option = new Option((pharmacy[0] >= 5000000 ? "Parafarmacia " : "") + titleCase(pharmacy[1]) + " — " + pharmacy[2], String(pharmacy[0]));
     option.dataset.name = pharmacy[1];
     option.dataset.address = pharmacy[2];
     selectFarmacia.append(option);
@@ -158,7 +168,7 @@ form.addEventListener("submit", async event => {
   const hours = always ? "" : hoursSummary();
   const email = byId("email").value.trim();
 
-  if (!chosen || !chosen.value) return showMessage("err", "Scegli la tua farmacia.");
+  if (!chosen || !chosen.value) return showMessage("err", "Scegli la tua farmacia o parafarmacia.");
   if (!phone) return showMessage("err", "Controlla il numero di telefono: servono solo cifre, con il prefisso.");
   if (site === false) return showMessage("err", "Il sito deve iniziare con http:// o https://.");
   if (!always && incompleteDay() !== -1) return showMessage("err", "Controlla gli orari: ogni fascia ha bisogno di apertura e chiusura.");

@@ -313,7 +313,7 @@ function card(pharmacy) {
   }
   if (pharmacy.info?.site) actions.append(withIcon(external("", pharmacy.info.site, "card-action"), "globe", "Sito web"));
   actions.append(withIcon(external("", directions(pharmacy), "card-action"), "directions", "Indicazioni"));
-  if (!isPara(pharmacy.id) && (!pharmacy.info?.phone || !hours)) {
+  if (!pharmacy.info?.phone || !hours) {
     const owner = element("a", "card-action", "Sei il titolare?");
     owner.href = "adesione.html?farmacia=" + pharmacy.id;
     actions.append(owner);
