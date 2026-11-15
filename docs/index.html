@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Cerca le farmacie italiane per comune, consulta gli indirizzi e trovale sulla mappa.">
+  <meta name="description" content="Cerca farmacie e parafarmacie italiane per comune, consulta indirizzi, recapiti e mappa. Dati del Ministero della Salute.">
   <meta name="theme-color" content="#f6faf7">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Farmacia Vicino">
-  <title>Farmacia Vicino — Trova una farmacia in Italia</title>
+  <title>Farmacia Vicino — Trova farmacie e parafarmacie in Italia</title>
   <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="leaflet/leaflet.css">
-  <link rel="stylesheet" href="styles.css?v=10">
+  <link rel="stylesheet" href="styles.css?v=11">
   <script defer src="leaflet/leaflet.js"></script>
   <script defer src="farmacie.js"></script>
   <script defer src="comuni.js"></script>
@@ -28,7 +28,7 @@
   <script defer src="orari-regionali.js"></script>
   <script defer src="schede-verificate.js"></script>
   <script defer src="servizi.js"></script>
-  <script defer src="app.js?v=14"></script>
+  <script defer src="app.js?v=15"></script>
 </head>
 <body id="inizio">
   <header class="topbar">
@@ -57,8 +57,8 @@
   <main>
     <section class="hero" aria-labelledby="titolo">
       <div class="wrap hero-inner">
-        <h1 id="titolo">Trova la tua farmacia<span>.</span></h1>
-        <p class="hero-copy">Trova le farmacie vicino a te o cerca per comune. Indirizzi, mappa e recapiti dove disponibili.</p>
+        <h1 id="titolo">Trova la tua farmacia o parafarmacia<span>.</span></h1>
+        <p class="hero-copy">Cerca per comune o vicino a te. In ogni comune scegli tra farmacie e parafarmacie. Indirizzi, mappa e recapiti dove disponibili.</p>
         <div class="search-tools">
           <button id="use-location" type="button" class="primary" aria-describedby="location-status" hidden><span data-icon="target"></span> Usa la mia posizione</button>
           <p id="location-status" role="status" aria-live="polite"></p>
@@ -181,11 +181,19 @@
         <h2 id="coverage-title">Stato dei dati</h2>
         <p id="coverage-unavailable">Dati non disponibili.</p>
         <div id="coverage-data" hidden>
+          <h3 class="coverage-sub">Farmacie</h3>
           <dl class="coverage-grid">
             <div><dt>Farmacie totali</dt><dd id="count-total"></dd></div>
             <div><dt>Con coordinate</dt><dd id="count-coordinates"></dd></div>
             <div><dt>Con telefono</dt><dd id="count-phone"></dd></div>
             <div><dt>Con orari</dt><dd id="count-hours"></dd></div>
+          </dl>
+          <h3 class="coverage-sub">Parafarmacie</h3>
+          <dl class="coverage-grid">
+            <div><dt>Parafarmacie totali</dt><dd id="pcount-total"></dd></div>
+            <div><dt>Con coordinate</dt><dd id="pcount-coordinates"></dd></div>
+            <div><dt>Con telefono</dt><dd id="pcount-phone"></dd></div>
+            <div><dt>Con orari</dt><dd id="pcount-hours"></dd></div>
           </dl>
           <p class="coverage-note">Anagrafe del Ministero del <time id="coverage-registry-date"></time><span id="coverage-osm" hidden>. Telefoni e orari abituali da OpenStreetMap, estrazione del <time id="coverage-osm-date"></time></span>.</p>
         </div>
@@ -238,7 +246,7 @@
     </div>
     <section>
       <h3>Anagrafe delle farmacie</h3>
-      <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0)<span id="ministry-snapshot" hidden>, estrazione del <time></time></span>. Le parafarmacie arrivano dal dataset <a href="https://www.dati.salute.gov.it/it/dataset/parafarmacie/" target="_blank" rel="noopener">Parafarmacie</a> dello stesso Ministero (IODL 2.0), con indirizzo e posizione ma senza orari o telefono. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
+      <p>Anagrafe e indirizzi dal <a href="https://www.dati.salute.gov.it/it/dataset/farmacie/" target="_blank" rel="noopener">Ministero della Salute</a> (IODL 2.0)<span id="ministry-snapshot" hidden>, estrazione del <time></time></span>. Le parafarmacie arrivano dal dataset <a href="https://www.dati.salute.gov.it/it/dataset/parafarmacie/" target="_blank" rel="noopener">Parafarmacie</a> dello stesso Ministero (IODL 2.0), con indirizzo e posizione. Telefono, sito e orari ci sono solo per le poche parafarmacie che li riportano su OpenStreetMap. Alcune coordinate provengono da <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>. Il segnaposto può essere approssimativo.</p>
     </section>
     <section>
       <h3>Comuni e frazioni</h3>

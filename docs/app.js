@@ -1038,6 +1038,7 @@ function initHomeDetails() {
 
   const groups = new Map();
   let total = 0, withCoordinates = 0, withPhone = 0, withHours = 0;
+  let pTotal = 0, pCoordinates = 0, pPhone = 0, pHours = 0;
   for (const town of cities) {
     if (!town.pharmacies.length) continue;
     const province = isTrentino(town.region) ? town.province : "";
@@ -1053,6 +1054,15 @@ function initHomeDetails() {
       if (record?.[2] || regionalContacts[row[0]]) withPhone++;
       if (record?.[4]) withHours++;
     }
+  }
+  for (const town of cities) for (const row of town.parafarmacie || []) {
+    pTotal++;
+    const coords = row[4];
+    if (coords?.length === 2 && coords.every(Number.isFinite) &&
+        Math.abs(coords[0]) <= 90 && Math.abs(coords[1]) <= 180) pCoordinates++;
+    const record = osmContacts[row[0]];
+    if (record?.[2]) pPhone++;
+    if (record?.[4]) pHours++;
   }
   if (!total) return;
 
@@ -1094,7 +1104,7 @@ function initHomeDetails() {
     let reachable = 0;
     for (const town of cities) for (const row of town.pharmacies) if (osmContacts[row[0]]?.[2] || regionalContacts[row[0]] || verified.get(row[0])?.phone) reachable++;
     const owners = [...verified.values()].filter(record => record.verifiedBy === "titolare").length;
-    trustStats.textContent = number.format(total) + " farmacie in anagrafe · " + number.format(reachable) + " con telefono · " +
+    trustStats.textContent = number.format(total) + " farmacie e " + number.format(pTotal) + " parafarmacie in anagrafe · " + number.format(reachable) + " farmacie con telefono · " +
       number.format(verified.size) + " schede controllate" + (owners ? " · " + number.format(owners) + " verificate dal titolare" : "");
     trustStats.hidden = false;
   }
@@ -1104,6 +1114,11 @@ function initHomeDetails() {
   byId("count-coordinates").textContent = share(withCoordinates);
   byId("count-phone").textContent = share(withPhone);
   byId("count-hours").textContent = share(withHours);
+  const pShare = value => number.format(value) + " (" + percent.format(value / (pTotal || 1) * 100) + "%)";
+  byId("pcount-total").textContent = number.format(pTotal) + " (100%)";
+  byId("pcount-coordinates").textContent = pShare(pCoordinates);
+  byId("pcount-phone").textContent = pShare(pPhone);
+  byId("pcount-hours").textContent = pShare(pHours);
   const registryDate = byId("coverage-registry-date");
   registryDate.dateTime = window.farmacie.date;
   registryDate.textContent = dateFormat.format(new Date(window.farmacie.date + "T00:00:00Z"));
