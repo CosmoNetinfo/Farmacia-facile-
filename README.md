@@ -43,7 +43,7 @@ Schermate della versione pubblicata l’11 novembre 2026. La ricerca per posizio
 | Anagrafe e indirizzi delle farmacie | [Ministero della Salute, dataset Farmacie](https://www.dati.salute.gov.it/it/dataset/farmacie/) | [IODL 2.0](https://www.isprambiente.gov.it/%2B%2Bplone%2B%2Bispra.gara/iodl2.pdf). Il sito converte il CSV in JavaScript. |
 | Comuni, denominazioni e fusioni | [ISTAT – SITUAS](https://situas.istat.it/web/) | [Note legali ISTAT](https://www.istat.it/note-legali/). Le frazioni ricercabili provengono dall’anagrafe delle farmacie. |
 | Parafarmacie (indirizzo e posizione) | [Ministero della Salute, dataset Parafarmacie](https://www.dati.salute.gov.it/it/dataset/parafarmacie/) | [IODL 2.0](https://www.isprambiente.gov.it/%2B%2Bplone%2B%2Bispra.gara/iodl2.pdf). 7.168 esercizi attivi al 14 novembre 2026, senza orari né telefono. Generati da [`scripts/importa-parafarmacie.py`](scripts/importa-parafarmacie.py) in [`docs/parafarmacie.js`](docs/parafarmacie.js). Nella pagina di un comune si passa da Farmacie a Parafarmacie con il selettore. Non hanno pagine statiche né turni. |
-| Recapiti delle parafarmacie | [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright), estrazione del 15 novembre 2026 | [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). 93 parafarmacie abbinate (52 telefoni, 29 siti, 44 orari). Generati da [`scripts/recapiti-parafarmacie.py`](scripts/recapiti-parafarmacie.py) in [`docs/recapiti-parafarmacie.js`](docs/recapiti-parafarmacie.js). |
+| Recapiti delle parafarmacie | [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright), estrazione del 15 novembre 2026 | [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). 182 parafarmacie abbinate (113 telefoni, 66 siti, 99 orari), integrate con il censimento del 14 novembre tramite [`scripts/importa-censimento.mjs`](scripts/importa-censimento.mjs). Generati da [`scripts/recapiti-parafarmacie.py`](scripts/recapiti-parafarmacie.py) in [`docs/recapiti-parafarmacie.js`](docs/recapiti-parafarmacie.js). |
 | Telefoni regionali | [Regione Lombardia](https://www.dati.lombardia.it/Sanit-/Farmacie/rzp3-qudj) (dato del 2020) e [Regione Friuli-Venezia Giulia](https://www.dati.friuliveneziagiulia.it/Salute-e-Sanit-/Farmacie/jbxd-m6xe) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/deed.it) e [IODL 2.0](https://www.dati.gov.it/iodl/2.0/). Abbinati all’anagrafe per comune e indirizzo, coordinate o nome. Usati solo dove OpenStreetMap non ha il telefono. Generati da [`scripts/recapiti-regionali.py`](scripts/recapiti-regionali.py) in [`docs/recapiti-regionali.js`](docs/recapiti-regionali.js). |
 | Recapiti, orari, alcune coordinate e cartografia | [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright) | [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). L’estrazione abbinata è disponibile in [`docs/recapiti-osm.js`](docs/recapiti-osm.js). |
 | Orari del giorno in Friuli-Venezia Giulia | [Regione Friuli-Venezia Giulia, dataset Farmacie](https://www.dati.friuliveneziagiulia.it/api/views/jbxd-m6xe.json) | IODL 2.0 |
@@ -55,18 +55,18 @@ Per i candidati ancora in valutazione consulta la [ricognizione sulle fonti dei 
 
 ## Quanto sono completi i dati
 
-Misura effettuata il **14 novembre 2026** sui file del repository. L’anagrafe ministeriale è dell’11 novembre 2026, l’estrazione OpenStreetMap del 10 novembre 2026 e i telefoni regionali (Lombardia e Friuli-Venezia Giulia) del 14 novembre 2026.
+Misura effettuata il **15 novembre 2026** sui file del repository. L’anagrafe ministeriale è dell’11 novembre 2026, l’estrazione OpenStreetMap del 10 novembre 2026 e i telefoni regionali (Lombardia e Friuli-Venezia Giulia) del 14 novembre 2026.
 
 | Dato | Farmacie | Quota sul totale |
 | --- | ---: | ---: |
 | Farmacie nell’anagrafe | 20.777 | 100% |
 | Coordinate utilizzabili | 18.941 | 91,2% |
-| Almeno un recapito, telefono o sito | 4.070 | 19,6% |
-| Numero di telefono | 3.947 | 19,0% |
-| Orari abituali pubblicati | 1.191 | 5,7% |
-| Sito web | 817 | 3,9% |
-| Almeno un dato tra telefono, sito e orari abituali | 4.305 | 20,7% |
-| Record OpenStreetMap abbinato nell’estrazione | 2.376 | 11,4% |
+| Almeno un recapito, telefono o sito | 4.108 | 19,8% |
+| Numero di telefono | 3.981 | 19,2% |
+| Orari abituali pubblicati | 1.359 | 6,5% |
+| Sito web | 836 | 4,0% |
+| Almeno un dato tra telefono, sito e orari abituali | 4.376 | 21,1% |
+| Record OpenStreetMap abbinato nell’estrazione | 2.458 | 11,8% |
 
 Il denominatore è il numero di ID ministeriali distinti nel [file pubblicato](https://cosmonetinfo.github.io/Farmacia-facile-/farmacie.js). Ogni riga della tabella conta le farmacie una sola volta per categoria. Le categorie possono sovrapporsi. Per telefono, sito e orari si applica la stessa precedenza del sito tra [schede verificate](https://cosmonetinfo.github.io/Farmacia-facile-/schede-verificate.js) ed [estrazione OpenStreetMap](https://cosmonetinfo.github.io/Farmacia-facile-/recapiti-osm.js). I turni e gli orari del giorno arrivano al momento della ricerca e restano fuori da questa misura.
 
