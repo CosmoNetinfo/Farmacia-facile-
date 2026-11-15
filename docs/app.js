@@ -42,7 +42,7 @@ function external(label, url, className) {
 document.querySelectorAll("[data-icon]").forEach(node => { node.innerHTML = icon(node.dataset.icon); });
 
 const verified = new Map((window.schedeVerificate || []).map(record => [record.id, record]));
-const osmContacts = window.recapitiOSM?.records || {};
+const osmContacts = { ...(window.recapitiOSM?.records || {}), ...(window.recapitiParafarmacie?.records || {}) };
 const regionalContacts = window.recapitiRegionali?.records || {};
 const regionalSources = window.recapitiRegionali?.sources || {};
 const osmDays = { Mo: "Lun", Tu: "Mar", We: "Mer", Th: "Gio", Fr: "Ven", Sa: "Sab", Su: "Dom", PH: "Festivi" };
