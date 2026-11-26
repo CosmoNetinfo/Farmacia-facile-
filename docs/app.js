@@ -42,6 +42,25 @@ function external(label, url, className) {
 document.querySelectorAll("[data-icon]").forEach(node => { node.innerHTML = icon(node.dataset.icon); });
 
 const verified = new Map((window.schedeVerificate || []).map(record => [record.id, record]));
+const approved = new Map();
+// I campi approvati sostituiscono solo quelli presenti: il resto della scheda resta.
+function withApproved(id, address, info) {
+  const row = approved.get(id);
+  if (!row || normalize(row.pharmacy_address) !== normalize(address)) return info;
+  const merged = { ...info };
+  delete merged.sourceUrl;
+  if (row.phone) { merged.phone = row.phone; delete merged.phoneSource; }
+  if (/^https?:\/\//.test(row.site || "")) merged.site = row.site;
+  if (row.always_open || row.hours_text) {
+    merged.hours = row.always_open ? "Tutti i giorni, 24 ore su 24" : row.hours_text;
+    merged.alwaysOpen = row.always_open;
+  }
+  if (row.servizi?.length) merged.services = row.servizi;
+  merged.verifiedOn = row.verificata_il;
+  merged.verifiedBy = row.verificato_da;
+  return merged;
+}
+function developerDevice() { try { return Boolean(localStorage.getItem("fvDevCode")); } catch { return false; } }
 const osmContacts = { ...(window.recapitiOSM?.records || {}), ...(window.recapitiParafarmacie?.records || {}) };
 const regionalContacts = window.recapitiRegionali?.records || {};
 const regionalSources = window.recapitiRegionali?.sources || {};
@@ -224,9 +243,10 @@ function turnText(turn) {
   return "Di turno · " + turn.date.split("-").reverse().join("/") + " · " + turn.hours;
 }
 function verificationLink(info, className) {
-  const label = info.verifiedBy === "titolare" ? "Verificato dal titolare" : "Verificato da CosmoNet";
+  const label = info.verifiedBy === "titolare" ? "Verificato dalla farmacia" : "Verificato da CosmoNet";
   const date = info.verifiedOn.split("-").reverse().join("/");
-  return external(label + " · " + date, info.sourceUrl, className);
+  const text = label + " · " + date;
+  return info.sourceUrl ? external(text, info.sourceUrl, className) : element("span", className, text);
 }
 function opensAllDay(pharmacy) {
   const daily = dailyHours(pharmacy);
@@ -313,8 +333,9 @@ function card(pharmacy) {
   }
   if (pharmacy.info?.site) actions.append(withIcon(external("", pharmacy.info.site, "card-action"), "globe", "Sito web"));
   actions.append(withIcon(external("", directions(pharmacy), "card-action"), "directions", "Indicazioni"));
-  if (!pharmacy.info?.phone || !hours) {
-    const owner = element("a", "card-action", "Sei il titolare?");
+  const dev = developerDevice();
+  if (dev || !pharmacy.info?.phone || !hours) {
+    const owner = element("a", "card-action", dev ? "Inserisci dati" : "Sei il titolare?");
     owner.href = "adesione.html?farmacia=" + pharmacy.id;
     actions.append(owner);
   }
@@ -331,7 +352,7 @@ function card(pharmacy) {
   actions.append(report);
   if (pharmacy.info?.source) actions.append(external(pharmacy.info.sourceLabel || "Fonte OSM", pharmacy.info.source, "card-source"));
   if (pharmacy.info?.phoneSource) actions.append(external(pharmacy.info.phoneSource.label, pharmacy.info.phoneSource.url, "card-source"));
-  if (pharmacy.info?.sourceUrl) actions.append(verificationLink(pharmacy.info, "card-source"));
+  if (pharmacy.info?.verifiedOn) actions.append(verificationLink(pharmacy.info, "card-source"));
   if (daily) actions.append(external(daily.label, daily.source, "card-source"));
   if (turn) actions.append(external(turn.label, turn.source, "card-source"));
   row.append(actions);
@@ -395,7 +416,7 @@ function popupContent(pharmacy) {
   if (pharmacy.info?.site) actions.append(external("Sito web ↗", pharmacy.info.site));
   if (pharmacy.info?.source) actions.append(external(pharmacy.info.sourceLabel || "Fonte OSM", pharmacy.info.source));
   if (pharmacy.info?.phoneSource) actions.append(external(pharmacy.info.phoneSource.label, pharmacy.info.phoneSource.url));
-  if (pharmacy.info?.sourceUrl) actions.append(verificationLink(pharmacy.info));
+  if (pharmacy.info?.verifiedOn) actions.append(verificationLink(pharmacy.info));
   if (daily) actions.append(external(daily.label, daily.source));
   if (turn) actions.append(external(turn.label, turn.source));
   content.append(actions);
@@ -520,7 +541,8 @@ function renderProvinceOptions() {
 }
 function toPharmacy([id, name, address, postcode, coords, type, village, localities], town, distance) {
   const official = verified.get(id);
-  const info = official && normalize(official.registryAddress) === normalize(address) ? official : communityDetails(id);
+  const known = official && normalize(official.registryAddress) === normalize(address) ? official : communityDetails(id);
+  const info = withApproved(id, address, known);
   const standardName = name === name.toLocaleUpperCase("it-IT") ? titleCase(name) : name;
   const fullName = /\b(?:farmacia|farmacie|parafarmacia|parafarmacie|dispensario|apotheke)\b/i.test(standardName)
     ? standardName : (isPara(id) ? "Parafarmacia " : type.toLowerCase().includes("dispensario") ? "Dispensario " : "Farmacia ") + standardName;
@@ -1105,7 +1127,7 @@ function initHomeDetails() {
     for (const town of cities) for (const row of town.pharmacies) if (osmContacts[row[0]]?.[2] || regionalContacts[row[0]] || verified.get(row[0])?.phone) reachable++;
     const owners = [...verified.values()].filter(record => record.verifiedBy === "titolare").length;
     trustStats.textContent = number.format(total) + " farmacie e " + number.format(pTotal) + " parafarmacie in anagrafe · " + number.format(reachable) + " farmacie con telefono · " +
-      number.format(verified.size) + " schede controllate" + (owners ? " · " + number.format(owners) + " verificate dal titolare" : "");
+      number.format(verified.size) + " schede controllate" + (owners ? " · " + number.format(owners) + " verificate dalla farmacia" : "");
     trustStats.hidden = false;
   }
 
@@ -1131,6 +1153,24 @@ function initHomeDetails() {
   byId("coverage-unavailable").hidden = true;
   byId("coverage-data").hidden = false;
 }
+
+// Schede approvate: arrivano dal database senza ripubblicare il sito.
+const APPROVED_URL = "https://tvrezwiqyoaigyxkzzkr.supabase.co/rest/v1/schede_approvate?select=*";
+const APPROVED_KEY = "sb_publishable_kjsyLiZm7PW7d7XPxAzbBg_Xa-Jz17_";
+async function loadApproved() {
+  const response = await fetch(APPROVED_URL, { headers: { apikey: APPROVED_KEY } });
+  if (!response.ok) return;
+  for (const row of await response.json()) approved.set(row.pharmacy_id, row);
+  // Aggiorna le schede già sullo schermo.
+  let changed = false;
+  for (const pharmacy of pharmacies) {
+    if (!approved.has(pharmacy.id)) continue;
+    pharmacy.info = withApproved(pharmacy.id, pharmacy.registryAddress, pharmacy.info);
+    changed = true;
+  }
+  if (changed) render();
+}
+loadApproved().catch(() => {});
 
 if ("serviceWorker" in navigator && window.location.protocol === "https:") {
   window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });

@@ -11,11 +11,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=8">
-  <link rel="stylesheet" href="adesione.css?v=3">
+  <link rel="stylesheet" href="adesione.css?v=4">
   <script defer src="farmacie.js"></script>
   <script defer src="parafarmacie.js"></script>
   <script defer src="servizi.js"></script>
-  <script defer src="adesione.js?v=3"></script>
+  <script defer src="adesione.js?v=4"></script>
 </head>
 <body>
   <header class="topbar">
@@ -27,12 +27,22 @@
     </div>
   </header>
   <main class="adesione">
-    <h1>Sei una farmacia o parafarmacia?</h1>
-    <p class="lead">Comunicaci telefono, sito e orari. Li controlliamo prima di pubblicarli, e la scheda mostrerà «Verificato dal titolare».</p>
+    <h1 id="titolo">Sei una farmacia o parafarmacia?</h1>
+    <p class="lead" id="intro">Comunicaci telefono, sito e orari. Li controlliamo prima di pubblicarli, e la scheda mostrerà «Verificato dalla farmacia».</p>
 
     <form id="adesione-form" novalidate>
+      <fieldset id="dev-box" hidden>
+        <legend>Modalità sviluppatore</legend>
+        <label>Codice
+          <input id="dev-code" type="password" autocomplete="current-password">
+          <small>Resta salvato solo su questo dispositivo, dopo il primo invio riuscito.</small>
+        </label>
+        <p class="note"><button type="button" class="link" id="dev-exit">Esci dalla modalità sviluppatore</button></p>
+      </fieldset>
+
       <fieldset>
         <legend>1. La tua attività</legend>
+        <p><button type="button" class="chip" id="vicine">Trova quelle vicine a me</button> <small id="vicine-stato" role="status"></small></p>
         <label>Comune
           <input id="comune" type="text" list="comuni-lista" autocomplete="off" placeholder="Scrivi il comune" required>
           <datalist id="comuni-lista"></datalist>
@@ -58,8 +68,10 @@
         <label class="check"><input id="always" type="checkbox"> Aperta 24 ore su 24, tutti i giorni</label>
         <div id="hours-wrap">
           <p class="note">Lascia vuoti i giorni di chiusura. Usa la seconda fascia solo se c'è la pausa.</p>
+          <label class="check"><input id="diversi" type="checkbox"> <span>Gli orari cambiano tra lunedì e venerdì</span></label>
           <div class="hours-grid hours-head" aria-hidden="true"><span></span><span>Apre</span><span>Chiude</span><span>Riapre</span><span>Chiude</span></div>
           <div id="hours-grid"></div>
+          <p><button type="button" class="chip" id="copia-sab">Sabato uguale a lun–ven</button></p>
         </div>
       </fieldset>
 
@@ -68,7 +80,7 @@
         <div id="servizi-lista" class="servizi-lista"></div>
       </fieldset>
 
-      <fieldset>
+      <fieldset class="solo-farmacia">
         <legend>5. Chi compila</legend>
         <label>Nome e cognome
           <input id="nome" type="text" autocomplete="name" required>
@@ -87,7 +99,7 @@
         </label>
       </fieldset>
 
-      <fieldset>
+      <fieldset class="solo-farmacia">
         <legend>6. Consensi</legend>
         <label class="check"><input id="c-pub" type="checkbox" required> <span>Dichiaro di poter comunicare questi dati per conto dell'attività e acconsento a pubblicarli su Farmacia Vicino.</span></label>
         <label class="check"><input id="c-priv" type="checkbox" required> <span>Ho letto l'<a href="privacy.html" target="_blank" rel="noopener">informativa privacy</a>: i miei dati di contatto servono solo alla verifica e non sono pubblicati.</span></label>
@@ -97,7 +109,7 @@
 
       <button class="primary" type="submit" id="invia">Invia la richiesta</button>
       <div id="esito" role="status" aria-live="polite"></div>
-      <p class="note">Prima di pubblicare, CosmoNet verifica la richiesta, ad esempio richiamando il numero che risulta dall'anagrafe. Finché non è verificata, la scheda non cambia.</p>
+      <p class="note solo-farmacia">Prima di pubblicare, CosmoNet verifica la richiesta, ad esempio richiamando il numero che risulta dall'anagrafe. Finché non è verificata, la scheda non cambia.</p>
     </form>
   </main>
 </body>
