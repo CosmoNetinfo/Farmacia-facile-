@@ -69,6 +69,9 @@ drop trigger if exists avvisa_telegram on public.adesioni;
 create trigger avvisa_telegram after insert on public.adesioni
   for each row execute function privato.avvisa_telegram();
 
+-- La funzione Telegram (chiave di servizio) deve poter leggere e aggiornare le richieste.
+grant select, update on table public.adesioni to service_role;
+
 -- Il pubblico non può auto-approvarsi.
 drop policy if exists "inserimento pubblico" on public.adesioni;
 create policy "inserimento pubblico" on public.adesioni
