@@ -68,6 +68,8 @@ window.schedeVerificate = [
     phone: "+39070570335",
     mobile: "+393792126657",
     whatsapp: true,
+    hours: "Lun–ven 08:30–13:30 e 16:00–20:30 · Sab 08:30–13:30 e 16:30–20:30",
+    alwaysOpen: false,
     services: ["ecg", "dermocosmesi", "autoanalisi", "animali"],
     verifiedOn: "2026-11-28",
     verifiedBy: "CosmoNet"
