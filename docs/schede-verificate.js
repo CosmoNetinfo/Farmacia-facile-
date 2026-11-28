@@ -59,5 +59,15 @@ window.schedeVerificate = [
     sourceUrl: "https://www.farmaciadedola.it/",
     verifiedOn: "2026-11-11",
     verifiedBy: "CosmoNet"
+  },
+  {
+    id: 16285,
+    registryAddress: "Via VIA DEL REDENTORE 59, 59",
+    name: "Farmacia Turno Dell'Apa",
+    address: "Via del Redentore, 59",
+    phone: "+39070570335",
+    services: ["ecg", "dermocosmesi", "autoanalisi", "animali"],
+    verifiedOn: "2026-11-28",
+    verifiedBy: "CosmoNet"
   }
 ];
