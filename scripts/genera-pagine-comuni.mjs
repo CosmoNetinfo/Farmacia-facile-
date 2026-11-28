@@ -97,7 +97,7 @@ for (const t of list) {
     const mobile = info?.mobile;
     const hours = info ? info.hours : osmHours(rec?.[4]);
     const title = info?.name || (/\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(name) ? titleCase(name) : (/dispensario/i.test(type) ? "Dispensario " : "Farmacia ") + titleCase(name));
-    const street = /\p{Lu}{3,}/u.test(address) ? titleCase(address) : address;
+    const street = info?.address || (/\p{Lu}{3,}/u.test(address) ? titleCase(address) : address);
     const svc = (info?.services || []).filter(k => servizi.has(k)).map(k => `<li>${esc(servizi.get(k))}</li>`).join("");
     return `      <li class="farmacia">
         <h3>${esc(title)}</h3>
