@@ -242,6 +242,8 @@ form.addEventListener("submit", async event => {
 
   const chosen = selectFarmacia.selectedOptions[0];
   const phone = normalizePhone(byId("phone").value);
+  const typedMobile = byId("mobile").value.trim();
+  const mobile = normalizePhone(typedMobile);
   const site = validSite(byId("site").value.trim());
   const always = byId("always").checked;
   const hours = always ? "" : hoursSummary();
@@ -252,6 +254,8 @@ form.addEventListener("submit", async event => {
   const code = byId("dev-code").value.trim();
   if (developer && !code) return showMessage("err", "Scrivi il codice sviluppatore.");
   if (!phone && (!developer || typedPhone)) return showMessage("err", "Controlla il numero di telefono: servono solo cifre, con il prefisso.");
+  if (typedMobile && !mobile) return showMessage("err", "Controlla il secondo numero: servono solo cifre, con il prefisso.");
+  if (byId("whatsapp").checked && !mobile) return showMessage("err", "Scrivi il secondo numero, oppure togli la spunta WhatsApp.");
   if (site === false) return showMessage("err", "Il sito deve iniziare con http:// o https://.");
   if (!always && incompleteDay() !== -1) return showMessage("err", "Controlla gli orari: ogni fascia ha bisogno di apertura e chiusura.");
   if (!developer && !always && !hours) return showMessage("err", "Inserisci gli orari, oppure indica che è aperta 24 ore su 24.");
@@ -269,6 +273,7 @@ form.addEventListener("submit", async event => {
     pharmacy_name: chosen.dataset.name,
     pharmacy_address: chosen.dataset.address,
     phone: phone || null, site: site || null,
+    ...(mobile ? { cellulare: mobile, whatsapp: byId("whatsapp").checked } : {}),
     hours_text: hours || null,
     always_open: always,
     servizi: [...document.querySelectorAll("#servizi-lista input:checked")].map(box => box.value),

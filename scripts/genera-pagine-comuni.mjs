@@ -94,6 +94,7 @@ for (const t of list) {
     const info = verified.get(id) && normalize(verified.get(id).registryAddress) === normalize(address) ? verified.get(id) : undefined;
     const rec = osm[id];
     const phone = info?.phone || rec?.[2] || regional[id]?.[0];
+    const mobile = info?.mobile;
     const hours = info ? info.hours : osmHours(rec?.[4]);
     const title = info?.name || (/\b(?:farmacia|farmacie|dispensario|apotheke)\b/i.test(name) ? titleCase(name) : (/dispensario/i.test(type) ? "Dispensario " : "Farmacia ") + titleCase(name));
     const street = /\p{Lu}{3,}/u.test(address) ? titleCase(address) : address;
@@ -101,7 +102,7 @@ for (const t of list) {
     return `      <li class="farmacia">
         <h3>${esc(title)}</h3>
         <p>${esc(street)}${cap && cap !== "-" ? ", " + esc(cap) : ""} ${esc(t.label)}</p>
-${hours ? `        <p class="orari">${esc(hours)}</p>\n` : ""}${phone ? `        <p><a href="tel:${esc(phone)}">${esc(phone.replace(/^\+39/, ""))}</a></p>\n` : ""}${svc ? `        <ul class="service-chips">${svc}</ul>\n` : ""}      </li>`;
+${hours ? `        <p class="orari">${esc(hours)}</p>\n` : ""}${phone ? `        <p><a href="tel:${esc(phone)}">${esc(phone.replace(/^\+39/, ""))}</a></p>\n` : ""}${mobile ? `        <p>Cellulare: <a href="tel:${esc(mobile)}">${esc(mobile.replace(/^\+39/, ""))}</a>${info.whatsapp ? ` · <a href="https://wa.me/${esc(mobile.replace(/\D/g, ""))}">WhatsApp</a>` : ""}</p>\n` : ""}${svc ? `        <ul class="service-chips">${svc}</ul>\n` : ""}      </li>`;
   }).join("\n");
   const n = rows.length;
   const where = `${t.label} (${t.province})`;

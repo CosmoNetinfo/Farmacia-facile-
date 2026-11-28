@@ -50,6 +50,7 @@ function withApproved(id, address, info) {
   const merged = { ...info };
   delete merged.sourceUrl;
   if (row.phone) { merged.phone = row.phone; delete merged.phoneSource; }
+  if (row.cellulare) { merged.mobile = row.cellulare; merged.whatsapp = Boolean(row.whatsapp); }
   if (/^https?:\/\//.test(row.site || "")) merged.site = row.site;
   if (row.always_open || row.hours_text) {
     merged.hours = row.always_open ? "Tutti i giorni, 24 ore su 24" : row.hours_text;
@@ -242,6 +243,7 @@ function pharmacyTurn(pharmacy) {
 function turnText(turn) {
   return "Di turno · " + turn.date.split("-").reverse().join("/") + " · " + turn.hours;
 }
+const whatsappUrl = number => "https://wa.me/" + number.replace(/\D/g, "");
 function verificationLink(info, className) {
   const label = info.verifiedBy === "titolare" ? "Verificato dalla farmacia" : "Verificato da CosmoNet";
   const date = info.verifiedOn.split("-").reverse().join("/");
@@ -331,6 +333,13 @@ function card(pharmacy) {
     phone.setAttribute("aria-label", "Chiama " + pharmacy.name + ", " + pharmacy.info.phone);
     actions.append(phone);
   }
+  if (pharmacy.info?.mobile) {
+    const mobile = withIcon(element("a", "card-action"), "phone", "Cellulare");
+    mobile.href = "tel:" + pharmacy.info.mobile;
+    mobile.setAttribute("aria-label", "Chiama il cellulare di " + pharmacy.name + ", " + pharmacy.info.mobile);
+    actions.append(mobile);
+    if (pharmacy.info.whatsapp) actions.append(external("WhatsApp ↗", whatsappUrl(pharmacy.info.mobile), "card-action"));
+  }
   if (pharmacy.info?.site) actions.append(withIcon(external("", pharmacy.info.site, "card-action"), "globe", "Sito web"));
   actions.append(withIcon(external("", directions(pharmacy), "card-action"), "directions", "Indicazioni"));
   const dev = developerDevice();
@@ -412,6 +421,12 @@ function popupContent(pharmacy) {
     const call = element("a", "", "Chiama");
     call.href = "tel:" + pharmacy.info.phone;
     actions.append(call);
+  }
+  if (pharmacy.info?.mobile) {
+    const mobile = element("a", "", "Cellulare");
+    mobile.href = "tel:" + pharmacy.info.mobile;
+    actions.append(mobile);
+    if (pharmacy.info.whatsapp) actions.append(external("WhatsApp ↗", whatsappUrl(pharmacy.info.mobile)));
   }
   if (pharmacy.info?.site) actions.append(external("Sito web ↗", pharmacy.info.site));
   if (pharmacy.info?.source) actions.append(external(pharmacy.info.sourceLabel || "Fonte OSM", pharmacy.info.source));

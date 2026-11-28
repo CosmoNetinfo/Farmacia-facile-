@@ -19,6 +19,8 @@ const entries = rows.map(row => [
   "    registryAddress: " + q(row.pharmacy_address) + ",",
   "    name: " + q(row.pharmacy_name) + ",",
   "    phone: " + q(row.phone) + ",",
+  row.cellulare ? "    mobile: " + q(row.cellulare) + "," : null,
+  row.cellulare ? "    whatsapp: " + Boolean(row.whatsapp) + "," : null,
   row.site ? "    site: " + q(row.site) + "," : null,
   "    hours: " + q(row.always_open ? "Tutti i giorni, 24 ore su 24" : row.hours_text) + ",",
   "    alwaysOpen: " + Boolean(row.always_open) + ",",

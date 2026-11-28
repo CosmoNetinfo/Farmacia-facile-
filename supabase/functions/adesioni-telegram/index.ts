@@ -30,6 +30,7 @@ function text(a: any) {
     `${a.pharmacy_name} (ID ${a.pharmacy_id})`,
     a.pharmacy_address,
     a.phone ? `Telefono: ${a.phone}` : "",
+    a.cellulare ? `Secondo numero: ${a.cellulare}${a.whatsapp ? " (WhatsApp)" : ""}` : "",
     a.site ? `Sito: ${a.site}` : "",
     a.always_open || a.hours_text ? `Orari: ${a.always_open ? "24 ore su 24" : a.hours_text}` : "",
     a.servizi?.length ? `Servizi: ${a.servizi.join(", ")}` : "",

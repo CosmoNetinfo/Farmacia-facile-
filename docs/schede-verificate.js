@@ -66,6 +66,8 @@ window.schedeVerificate = [
     name: "Farmacia Turno Dell'Apa",
     address: "Via del Redentore, 59",
     phone: "+39070570335",
+    mobile: "+393792126657",
+    whatsapp: true,
     services: ["ecg", "dermocosmesi", "autoanalisi", "animali"],
     verifiedOn: "2026-11-28",
     verifiedBy: "CosmoNet"
